@@ -1,18 +1,59 @@
 import React, { useState } from 'react';
+import apiService from '../services/api.js';
 
 const logoPath = '/src/images/logo.png';
 
 function AddProfile({ onBack }) {
     const [form, setForm] = useState({});
+    const [files, setFiles] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
     const handleChange = (field, value) => {
         setForm({ ...form, [field]: value });
+        setError(''); // Clear error on input change
     };
 
-    const handleSubmit = (e) => {
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        setFiles(selectedFiles);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert('Profile added!');
-        if (onBack) onBack();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            // Validate required fields
+            const requiredFields = ['fullName', 'dob', 'age', 'gender', 'radicalizationLevel'];
+            const missingFields = requiredFields.filter(field => !form[field]);
+            
+            if (missingFields.length > 0) {
+                throw new Error(`Please fill in required fields: ${missingFields.join(', ')}`);
+            }
+
+            // Create profile with backend API
+            const response = await apiService.createProfile(form, files);
+            
+            if (response.success) {
+                setSuccess(`Profile created successfully! Profile ID: ${response.data.profileId}`);
+                
+                // Auto-redirect after success
+                setTimeout(() => {
+                    if (onBack) onBack();
+                }, 2000);
+            } else {
+                throw new Error(response.message || 'Failed to create profile');
+            }
+        } catch (error) {
+            console.error('❌ Profile creation error:', error);
+            setError(error.message || 'Failed to create profile. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const columns = [
@@ -158,6 +199,40 @@ function AddProfile({ onBack }) {
                 </h1>
             </div>
 
+            {/* Success Message */}
+            {success && (
+                <div style={{
+                    maxWidth: '1400px',
+                    margin: '0 auto 24px auto',
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '12px',
+                    padding: '16px 24px',
+                    color: '#166534',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                }}>
+                    ✅ {success}
+                </div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+                <div style={{
+                    maxWidth: '1400px',
+                    margin: '0 auto 24px auto',
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    borderRadius: '12px',
+                    padding: '16px 24px',
+                    color: '#991b1b',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                }}>
+                    ❌ {error}
+                </div>
+            )}
+
             {/* Main Form Container */}
             <div style={{
                 backgroundColor: '#ffffff',
@@ -234,7 +309,8 @@ function AddProfile({ onBack }) {
                                                     <input
                                                         type="file"
                                                         multiple={field.multiple}
-                                                        onChange={e => handleChange(field.name, e.target.files)}
+                                                        accept="image/*"
+                                                        onChange={field.name === 'photos' ? handleFileChange : e => handleChange(field.name, e.target.files)}
                                                         style={{
                                                             ...inputStyles.base,
                                                             padding: '8px 12px'
@@ -306,22 +382,24 @@ function AddProfile({ onBack }) {
                     <button
                         type="submit"
                         onClick={handleSubmit}
+                        disabled={isLoading}
                         style={{
                             padding: '12px 32px',
-                            background: 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%)',
+                            background: isLoading ? '#9ca3af' : 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%)',
                             color: '#ffffff',
                             border: 'none',
                             borderRadius: '10px',
                             fontSize: '16px',
                             fontWeight: '500',
-                            cursor: 'pointer',
+                            cursor: isLoading ? 'not-allowed' : 'pointer',
                             transition: 'all 0.2s ease',
-                            boxShadow: '0 4px 12px rgba(79, 70, 229, 0.3)'
+                            boxShadow: isLoading ? 'none' : '0 4px 12px rgba(79, 70, 229, 0.3)',
+                            opacity: isLoading ? 0.7 : 1
                         }}
-                        onMouseOver={e => e.target.style.transform = 'translateY(-2px)'}
-                        onMouseOut={e => e.target.style.transform = 'translateY(0px)'}
+                        onMouseOver={e => !isLoading && (e.target.style.transform = 'translateY(-2px)')}
+                        onMouseOut={e => !isLoading && (e.target.style.transform = 'translateY(0px)')}
                     >
-                        Add Profile →
+                        {isLoading ? 'Creating Profile...' : 'Add Profile →'}
                     </button>
                 </div>
             </div>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import apiService from '../services/api.js';
 
 const logoPath = '/src/images/logo.png';
 
@@ -6,13 +7,67 @@ import AddProfile from './addProfile.jsx';
 
 function Dashboard() {
     const [page, setPage] = useState('dashboard');
+    const [stats, setStats] = useState([
+        { label: 'Total Profiles', value: '0', color: '#1e40af', bgColor: '#dbeafe', change: '+0' },
+        { label: 'High-Risk Subjects', value: '0', color: '#dc2626', bgColor: '#fecaca', change: '+0' },
+        { label: 'Under Surveillance', value: '0', color: '#f59e0b', bgColor: '#fef3c7', change: '+0' },
+        { label: 'Recent Updates', value: '0', color: '#059669', bgColor: '#d1fae5', change: '+0' },
+    ]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
-    const stats = [
-        { label: 'Total Profiles', value: '1,247', color: '#1e40af', bgColor: '#dbeafe', change: '+12' },
-        { label: 'High-Risk Subjects', value: '86', color: '#dc2626', bgColor: '#fecaca', change: '+3' },
-        { label: 'Under Surveillance', value: '342', color: '#f59e0b', bgColor: '#fef3c7', change: '-5' },
-        { label: 'Recent Updates', value: '57', color: '#059669', bgColor: '#d1fae5', change: '+8' },
-    ];
+    // Load dashboard statistics from backend
+    useEffect(() => {
+        loadDashboardStats();
+    }, []);
+
+    const loadDashboardStats = async () => {
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const response = await apiService.getStats();
+            
+            if (response.success) {
+                const statsData = response.data;
+                setStats([
+                    { 
+                        label: 'Total Profiles', 
+                        value: statsData.totalProfiles.toString(),
+                        color: '#1e40af', 
+                        bgColor: '#dbeafe', 
+                        change: `+${statsData.recentChanges?.newProfiles || 0}` 
+                    },
+                    { 
+                        label: 'High-Risk Subjects', 
+                        value: statsData.highRiskCount.toString(),
+                        color: '#dc2626', 
+                        bgColor: '#fecaca', 
+                        change: `+${statsData.recentChanges?.highRisk || 0}` 
+                    },
+                    { 
+                        label: 'Under Surveillance', 
+                        value: statsData.activeMonitoring.toString(),
+                        color: '#f59e0b', 
+                        bgColor: '#fef3c7', 
+                        change: `${statsData.recentChanges?.surveillance >= 0 ? '+' : ''}${statsData.recentChanges?.surveillance || 0}` 
+                    },
+                    { 
+                        label: 'Recent Updates', 
+                        value: statsData.recentUpdates.toString(),
+                        color: '#059669', 
+                        bgColor: '#d1fae5', 
+                        change: `+${statsData.recentChanges?.updates || 0}` 
+                    },
+                ]);
+            }
+        } catch (error) {
+            console.error('❌ Failed to load dashboard stats:', error);
+            setError('Failed to load dashboard statistics. Using offline mode.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     if (page === 'add') {
         return <AddProfile onBack={() => setPage('dashboard')} />;
@@ -78,6 +133,21 @@ function Dashboard() {
                         Secure intelligence database for law enforcement operations
                     </p>
                 </div>
+
+                {/* Error Display */}
+                {error && (
+                    <div style={{
+                        background: '#fef2f2',
+                        border: '1px solid #fecaca',
+                        borderRadius: '8px',
+                        padding: '16px',
+                        marginBottom: '24px',
+                        color: '#991b1b',
+                        fontSize: '14px'
+                    }}>
+                        ⚠️ {error}
+                    </div>
+                )}
 
                 {/* Statistics Grid */}
                 <div style={{ 
