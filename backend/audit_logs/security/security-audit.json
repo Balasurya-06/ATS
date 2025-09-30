@@ -9,6 +9,21 @@
             "date": 1758976938358,
             "name": "audit_logs/security/security-2025-09-27.log",
             "hash": "e89925577807ee130f1674743c4eb56998cc80f957dbe3fc342e5035b42929db"
+        },
+        {
+            "date": 1758989999196,
+            "name": "audit_logs\\security\\security-2025-09-27.log",
+            "hash": "0f8350d6d1bbd6f3f906f742b238e11a9803885e7fa6bbae00f45173302357d4"
+        },
+        {
+            "date": 1759160329611,
+            "name": "audit_logs\\security\\security-2025-09-29.log",
+            "hash": "4ac305e395f8296dc8d3e7f5ad9d7ab6542168006cdd7fb23dcfeb813893ff08"
+        },
+        {
+            "date": 1759195428528,
+            "name": "audit_logs\\security\\security-2025-09-30.log",
+            "hash": "bbee849f52c8b64aeb719c393b87dc6eea25e30993f285cd8ea0c3dc580ebdff"
         }
     ],
     "hashType": "sha256"

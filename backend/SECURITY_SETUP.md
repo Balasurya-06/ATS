@@ -103,7 +103,7 @@ npm run secure
 Frontend connects to System 1 via network IP:
 ```javascript
 // In your frontend API configuration
-const API_BASE_URL = 'http://192.168.1.100:3000/api';
+const API_BASE_URL = '192.168.1.6:3000/api';
 const NETWORK_KEY = 'your_shared_secret_key';
 
 // Add network key to all requests

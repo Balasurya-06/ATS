@@ -132,7 +132,7 @@ app.use(cors({
         if (!origin) return callback(null, true);
         
         const allowedOrigins = process.env.NODE_ENV === 'production' 
-            ? ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://192.168.1.100:3000'] // Add your specific IPs
+            ? ['http://localhost:3000', 'http://127.0.0.1:3000', '192.168.1.6:3000'] // Add your specific IPs
             : true;
         
         if (allowedOrigins === true) {
