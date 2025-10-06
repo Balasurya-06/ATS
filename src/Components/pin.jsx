@@ -4,19 +4,11 @@ import apiService from '../services/api.js';
 const logoPath = '/src/images/logo.png';
 
 function PinPage({ onSuccess }) {
-  const [pin, setPin] = useState('2815');
+  const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Auto-login after 2 seconds
-  React.useEffect(() => {
-    const autoLogin = setTimeout(() => {
-      console.log('🔄 Auto-authenticating...');
-      onSuccess(); // Bypass authentication for development
-    }, 2000);
-
-    return () => clearTimeout(autoLogin);
-  }, [onSuccess]);
+  // Remove auto-login effect
 
   const handleChange = (e) => {
     setPin(e.target.value);
@@ -28,24 +20,15 @@ function PinPage({ onSuccess }) {
     setIsLoading(true);
     setError('');
 
-    try {
-      // Auto-authenticate with default PIN
-      const response = await apiService.login('2815');
-      
-      if (response.token) {
-        console.log('🔐 Authentication successful');
-        onSuccess();
-      } else {
-        setError('Authentication failed. Please try again.');
-      }
-    } catch (error) {
-      console.error('❌ Authentication error:', error);
-      // For now, just bypass authentication and proceed
-      console.log('⚠️ Authentication bypassed for development');
+    // Only allow PIN 2552
+    if (pin === '2552') {
+      // Optionally, call backend for logging or session
+      // await apiService.login('2552');
       onSuccess();
-    } finally {
-      setIsLoading(false);
+    } else {
+      setError('Wrong pass. Please try again.');
     }
+    setIsLoading(false);
   };
 
   return (
@@ -57,8 +40,7 @@ function PinPage({ onSuccess }) {
           value={pin}
           onChange={handleChange}
           maxLength={4}
-          placeholder="2815"
-          defaultValue="2815"
+          placeholder="Enter PIN"
           style={{ fontSize: 24, padding: '8px 16px', borderRadius: 8, border: '1px solid #ccc', textAlign: 'center', width: 120 }}
         />
         <button 

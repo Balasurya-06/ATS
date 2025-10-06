@@ -307,7 +307,7 @@ function Dashboard() {
                             </div>
                         </button>
 
-                        <button style={{ 
+                        {/* <button style={{ 
                             background: '#7c2d12',
                             color: '#ffffff', 
                             border: 'none', 
@@ -335,9 +335,9 @@ function Dashboard() {
                             <div style={{ fontSize: '13px', opacity: '0.9' }}>
                                 Generate risk analysis and intelligence reports
                             </div>
-                        </button>
+                        </button> */}
 
-                        <button style={{ 
+                        {/* <button style={{ 
                             background: '#374151',
                             color: '#ffffff', 
                             border: 'none', 
@@ -365,7 +365,7 @@ function Dashboard() {
                             <div style={{ fontSize: '13px', opacity: '0.9' }}>
                                 User management and system configuration
                             </div>
-                        </button>
+                        </button> */}
                     </div>
                 </div>
 
