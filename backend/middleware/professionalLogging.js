@@ -27,7 +27,7 @@ const professionalAPILogger = (req, res, next) => {
         // Log the API call with beautiful formatting
         ProfessionalLogger.logAPICall(
             req.method,
-            req.path,
+            req.originalUrl,
             res.statusCode,
             duration,
             userId,
@@ -67,7 +67,7 @@ const professionalAPILogger = (req, res, next) => {
 
         ProfessionalLogger.logAPICall(
             req.method,
-            req.path,
+            req.originalUrl,
             res.statusCode,
             duration,
             userId,
@@ -92,7 +92,7 @@ const securityEventLogger = (eventType) => {
 
             ProfessionalLogger.logSecurity(eventType, level, {
                 method: req.method,
-                endpoint: req.path,
+                endpoint: req.originalUrl,
                 ip: req.ip || req.connection.remoteAddress,
                 userAgent: req.headers['user-agent'],
                 userId: req.user?.userId || 'anonymous',
@@ -152,7 +152,7 @@ const authLogger = (req, res, next) => {
             req.headers['user-agent'],
             success,
             {
-                endpoint: req.path,
+                endpoint: req.originalUrl,
                 method: req.method,
                 statusCode: res.statusCode,
                 hasNetworkKey: !!req.headers['x-network-key']

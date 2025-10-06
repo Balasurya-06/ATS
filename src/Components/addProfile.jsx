@@ -7,28 +7,129 @@ function AddProfile({ onBack }) {
     // ...existing code...
     // State for dynamic lists
     const [form, setForm] = useState({
-        imeiNumbers: [''],
-        family: [{ relation: '', name: '' }],
-        children: [{ gender: '', name: '' }],
-        relativesAbroad: [''],
-        relativesIndia: [''],
-        associatesAbroad: [''],
-        relativesSecurity: [''],
-        education: [{ level: '', school: '', year: '' }],
-        idCards: [{ type: '', number: '', details: '' }],
-        socialMedia: [{ type: '', id: '' }],
-        languages: [{ language: '', read: false, write: false, speak: false }],
-        identificationMarks: [''],
-        dress: [''],
-        peculiarities: [''],
-        physicalPeculiarities: [''],
-        habits: [''],
-        properties: [{ type: '', details: '' }],
-        vehicles: [{ regNo: '', details: '' }],
-        associatesJail: [''],
-        cases: [{ district: '', policeStation: '', crNo: '', agency: '', court: '', caseStatus: '', remarks: '' }],
-        closeAssociates: [{ name: '', address: '', phone: '' }],
-        // ...other fields as needed
+        // Basic Details
+        name: 'John Doe @ Johnny',
+        case: 'Case #2025-001',
+        
+        // Personal Information
+        guardian: 'Robert Doe (Father)',
+        placeOfBirth: 'Mumbai, Maharashtra',
+        dob: '1990-05-15',
+        gender: 'Male',
+        maritalStatus: 'Married',
+        phone: '+91-9876543210',
+        imeiNumbers: ['123456789012345', '987654321098765'],
+        
+        // Family Members
+        father: 'Robert Doe',
+        mother: 'Mary Doe',
+        brothers: 'Michael Doe (Elder), David Doe (Younger)',
+        sisters: 'Sarah Doe (Elder)',
+        uncles: 'Thomas Doe, William Doe',
+        aunts: 'Elizabeth Doe, Catherine Doe',
+        wives: 'Jane Doe',
+        children: [
+            { gender: 'Son', name: 'Alex Doe' },
+            { gender: 'Daughter', name: 'Emma Doe' }
+        ],
+        closeFriends: 'Mike Johnson, Steve Wilson',
+        relativesWifeSide: 'Peter Smith (Brother-in-law), Anna Smith (Sister-in-law)',
+        
+        // Relatives & Associates
+        relationsAbroad: 'Uncle in Dubai, Cousin in USA',
+        relationsIndia: 'Aunt in Delhi, Cousins in Bangalore',
+        associatesAbroad: 'Business partners in Pakistan and Bangladesh',
+        relativesSecurity: 'Colonel James (Army), Inspector Raj (Police)',
+        
+        // Background & Address
+        occupationBefore: 'Software Engineer',
+        presentAddress: '123 MG Road, Bandra West, Mumbai - 400050',
+        permanentAddress: '456 Linking Road, Bandra West, Mumbai - 400050',
+        hideouts: 'Andheri East (2018-2020), Thane West (2021-2022)',
+        nationality: 'Indian',
+        religion: 'Christian',
+        bloodGroup: 'O+',
+        education: [
+            { level: '10th Standard', school: 'St. Xavier\'s High School', year: '2006' },
+            { level: '12th Standard', school: 'St. Xavier\'s College', year: '2008' },
+            { level: 'Bachelor of Engineering', school: 'IIT Bombay', year: '2012' }
+        ],
+        expertise: 'Cyber Security, Network Hacking',
+        profession: 'Software Developer at TechCorp, Mumbai - Phone: +91-9876543211',
+        annualIncome: '₹15,00,000',
+        bankDetails: 'HDFC Bank, Bandra Branch, Account: 1234567890, IFSC: HDFC0001234',
+        
+        // Identity Cards
+        dl: 'MH01-2020123456, Issued: Andheri RTO',
+        pan: 'ABCDE1234F, Name: John Doe',
+        aadhar: '1234-5678-9012, Name: John Doe',
+        passport: 'P1234567, Issued: 2015, Valid till: 2025',
+        voter: 'ABC1234567, Constituency: Bandra West',
+        ration: 'MH/123/456789, Family of 4',
+        creditCard: 'ICICI Bank, ****-****-****-1234',
+        
+        // Social Media IDs
+        email: 'john.doe@example.com',
+        whatsapp: '+91-9876543210',
+        facebook: 'facebook.com/johndoe',
+        instagram: 'instagram.com/john_doe_official',
+        telegram: '@johndoe123',
+        upi: 'johndoe@okhdfcbank',
+        youtube: 'youtube.com/c/JohnDoeTech',
+        
+        // Physical & Facial Description
+        height: '175 cm',
+        weight: '70 kg',
+        bodyBuild: 'Athletic',
+        complexion: 'Fair',
+        hair: 'Black, Short, 5 cm',
+        eye: 'Brown',
+        moustache: 'Thin black moustache',
+        beard: 'Clean shaven',
+        
+        // Other Details
+        languagesKnown: 'English (Read/Write/Speak), Hindi (Read/Write/Speak), Marathi (Speak)',
+        identificationMark: 'Scar on left forearm, Tattoo on right shoulder',
+        dress: 'Usually wears jeans and t-shirts, sometimes formal shirts',
+        peculiarity: 'Walks with slight limp, speaks fast',
+        handed: 'Right handed',
+        physicalPeculiarity: 'Slight limp in left leg due to old injury',
+        speechStyle: 'Fast speaker, uses technical jargon',
+        mannerism: 'Fidgets with phone when nervous',
+        habits: 'Smokes occasionally, drinks socially',
+        whereabouts: 'Currently in Mumbai, frequently travels to Delhi',
+        illegalActivities: 'Suspected cyber fraud, money laundering',
+        activitiesType: 'MODUS OPERANDI: Uses phishing emails and fake websites',
+        prevOrg: 'TechCorp Ltd, Software Developer',
+        presentOrg: 'CyberTech Solutions, Senior Developer',
+        religiousActivities: 'Regular church goer on Sundays',
+        radicalizationPotential: 'Low - No signs of radicalization',
+        economicStatus: 'Upper middle class, owns property',
+        mainFinancier: 'Self-financed, some support from family',
+        countriesVisited: 'USA (2018), Dubai (2019), Singapore (2022)',
+        illegalCrossings: 'Crossed into Nepal via Raxaul border (2019)',
+        guides: 'Local contacts in border areas',
+        properties: '2 BHK apartment in Bandra (owned), Commercial property in Thane (leased)',
+        vehicles: 'MH01-AB-1234 (Honda City), MH02-CD-5678 (Royal Enfield Bullet)',
+        hideoutPlace: 'Rural areas in Maharashtra, Goa beaches',
+        advocate: 'Advocate Ramesh Kumar, Phone: +91-9876543212',
+        arrestDetails: 'Arrested in 2023 for cyber fraud case',
+        jailActivities: 'Was in Arthur Road Jail for 6 months',
+        associatesJail: 'Met Raju Sharma and Vijay Patel during incarceration',
+        casesInvolved: '5 cases registered',
+        securityProceedings: 'Section 66A IT Act, Section 420 IPC',
+        prisonStatus: 'Currently out on bail',
+        interrogatedBy: 'Mumbai Police Cyber Cell, CBI',
+        houseGPS: '19.0759° N, 72.8777° E, Remarks: Residential area',
+        workGPS: '19.0760° N, 72.8778° E, Remarks: Commercial complex',
+        closeAssociates: [
+            { name: 'Mike Johnson', address: 'Andheri East, Mumbai', phone: '+91-9876543213' },
+            { name: 'Steve Wilson', address: 'Bandra West, Mumbai', phone: '+91-9876543214' }
+        ],
+        video: '3-minute video recorded showing face and voice',
+        verifiedBy: 'Inspector Rajesh Kumar',
+        dateOfCreation: '2025-10-06',
+        caseParticulars: 'Multiple cyber fraud cases, money laundering allegations, under surveillance since 2023'
     });
     const [files, setFiles] = useState({ front: null, back: null, side: null });
     const [isLoading, setIsLoading] = useState(false);
@@ -60,6 +161,128 @@ function AddProfile({ onBack }) {
         });
     };
 
+    // Reset form to empty values
+    const resetForm = () => {
+        setForm({
+            // Basic Details
+            name: '',
+            case: '',
+            
+            // Personal Information
+            guardian: '',
+            placeOfBirth: '',
+            dob: '',
+            gender: '',
+            maritalStatus: '',
+            phone: '',
+            imeiNumbers: [''],
+            
+            // Family Members
+            father: '',
+            mother: '',
+            brothers: '',
+            sisters: '',
+            uncles: '',
+            aunts: '',
+            wives: '',
+            children: [{ gender: '', name: '' }],
+            closeFriends: '',
+            relativesWifeSide: '',
+            
+            // Relatives & Associates
+            relationsAbroad: '',
+            relationsIndia: '',
+            associatesAbroad: '',
+            relativesSecurity: '',
+            
+            // Background & Address
+            occupationBefore: '',
+            presentAddress: '',
+            permanentAddress: '',
+            hideouts: '',
+            nationality: '',
+            religion: '',
+            bloodGroup: '',
+            education: [{ level: '', school: '', year: '' }],
+            expertise: '',
+            profession: '',
+            annualIncome: '',
+            bankDetails: '',
+            
+            // Identity Cards
+            dl: '',
+            pan: '',
+            aadhar: '',
+            passport: '',
+            voter: '',
+            ration: '',
+            creditCard: '',
+            
+            // Social Media IDs
+            email: '',
+            whatsapp: '',
+            facebook: '',
+            instagram: '',
+            telegram: '',
+            upi: '',
+            youtube: '',
+            
+            // Physical & Facial Description
+            height: '',
+            weight: '',
+            bodyBuild: '',
+            complexion: '',
+            hair: '',
+            eye: '',
+            moustache: '',
+            beard: '',
+            
+            // Other Details
+            languagesKnown: '',
+            identificationMark: '',
+            dress: '',
+            peculiarity: '',
+            handed: '',
+            physicalPeculiarity: '',
+            speechStyle: '',
+            mannerism: '',
+            habits: '',
+            whereabouts: '',
+            illegalActivities: '',
+            activitiesType: '',
+            prevOrg: '',
+            presentOrg: '',
+            religiousActivities: '',
+            radicalizationPotential: '',
+            economicStatus: '',
+            mainFinancier: '',
+            countriesVisited: '',
+            illegalCrossings: '',
+            guides: '',
+            properties: '',
+            vehicles: '',
+            hideoutPlace: '',
+            advocate: '',
+            arrestDetails: '',
+            jailActivities: '',
+            associatesJail: '',
+            casesInvolved: '',
+            securityProceedings: '',
+            prisonStatus: '',
+            interrogatedBy: '',
+            houseGPS: '',
+            workGPS: '',
+            closeAssociates: [{ name: '', address: '', phone: '' }],
+            video: '',
+            verifiedBy: '',
+            dateOfCreation: '',
+            caseParticulars: ''
+        });
+        setFiles({ front: null, back: null, side: null });
+        setError('');
+        setSuccess('');
+    };
+
     // ...existing code...
     // File change for 3 photos
     const handlePhotoChange = (view, file) => {
@@ -88,12 +311,18 @@ function AddProfile({ onBack }) {
             // Call API (update as needed)
             const response = await apiService.createProfile(form, files);
             if (response.success) {
-                setSuccess('Profile created successfully!');
-                setTimeout(() => { if (onBack) onBack(); }, 2000);
+                setSuccess(`Profile created successfully! Profile ID: ${response.data?.profileId || 'N/A'}`);
+                // Redirect to dashboard after 2 seconds
+                setTimeout(() => { 
+                    if (onBack) {
+                        onBack(); // This should reload the dashboard stats
+                    }
+                }, 2000);
             } else {
                 throw new Error(response.message || 'Failed to create profile');
             }
         } catch (error) {
+            console.error('Profile creation error:', error);
             setError(error.message || 'Failed to create profile. Please try again.');
         } finally {
             setIsLoading(false);
@@ -132,6 +361,11 @@ function AddProfile({ onBack }) {
             {/* Success/Error */}
             {success && (<div style={{ maxWidth: '1400px', margin: '0 auto 24px auto', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px 24px', color: '#166534', fontSize: '14px', fontWeight: '500' }}>✅ {success}</div>)}
             {error && (<div style={{ maxWidth: '1400px', margin: '0 auto 24px auto', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '16px 24px', color: '#991b1b', fontSize: '14px', fontWeight: '500' }}>❌ {error}</div>)}
+
+            {/* Demo Notice */}
+            <div style={{ maxWidth: '1400px', margin: '0 auto 24px auto', background: '#fef3c7', border: '1px solid #fcd34d', borderRadius: '12px', padding: '16px 24px', color: '#92400e', fontSize: '14px', fontWeight: '500' }}>
+                📝 <strong>Demo Mode:</strong> Form is pre-filled with sample data for testing. Click "🔄 Reset Form" to clear all fields. You can upload photos separately.
+            </div>
 
             {/* Main Form */}
             <form onSubmit={handleSubmit} style={{ backgroundColor: '#ffffff', borderRadius: '20px', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', padding: '32px', maxWidth: '1400px', margin: '0 auto' }}>
@@ -440,7 +674,10 @@ function AddProfile({ onBack }) {
                 {/* Action Buttons */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
                     <button type="button" onClick={onBack} style={{ padding: '12px 32px', backgroundColor: '#f3f4f6', color: '#374151', border: '1px solid #d1d5db', borderRadius: '10px', fontSize: '16px', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s ease' }} onMouseOver={e => e.target.style.backgroundColor = '#e5e7eb'} onMouseOut={e => e.target.style.backgroundColor = '#f3f4f6'}>← Back</button>
-                    <button type="submit" disabled={isLoading} style={{ padding: '12px 32px', background: isLoading ? '#9ca3af' : 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%)', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '16px', fontWeight: '500', cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', boxShadow: isLoading ? 'none' : '0 4px 12px rgba(79, 70, 229, 0.3)', opacity: isLoading ? 0.7 : 1 }} onMouseOver={e => !isLoading && (e.target.style.transform = 'translateY(-2px)')} onMouseOut={e => !isLoading && (e.target.style.transform = 'translateY(0px)')}>{isLoading ? 'Creating Profile...' : 'Add Profile →'}</button>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <button type="button" onClick={resetForm} style={{ padding: '12px 24px', backgroundColor: '#f59e0b', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s ease' }} onMouseOver={e => e.target.style.backgroundColor = '#d97706'} onMouseOut={e => e.target.style.backgroundColor = '#f59e0b'}>🔄 Reset Form</button>
+                        <button type="submit" disabled={isLoading} style={{ padding: '12px 32px', background: isLoading ? '#9ca3af' : 'linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%)', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '16px', fontWeight: '500', cursor: isLoading ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', boxShadow: isLoading ? 'none' : '0 4px 12px rgba(79, 70, 229, 0.3)', opacity: isLoading ? 0.7 : 1 }} onMouseOver={e => !isLoading && (e.target.style.transform = 'translateY(-2px)')} onMouseOut={e => !isLoading && (e.target.style.transform = 'translateY(0px)')}>{isLoading ? 'Creating Profile...' : 'Add Profile →'}</button>
+                    </div>
                 </div>
             </form>
         </div>

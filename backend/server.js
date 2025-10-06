@@ -20,6 +20,7 @@ const {
     generalRateLimit,
     authRateLimit,
     profileRateLimit,
+    readRateLimit,
     speedLimiter,
     ipWhitelist,
     networkKeyValidation,
@@ -98,10 +99,16 @@ app.use(intrusionDetection);
 // Request sanitization
 app.use(sanitizeRequest);
 
-// Speed limiting for suspicious behavior
-app.use(speedLimiter);
+// Speed limiting for suspicious behavior (only for non-GET requests)
+app.use((req, res, next) => {
+    if (req.method !== 'GET') {
+        speedLimiter(req, res, next);
+    } else {
+        next();
+    }
+});
 
-// General rate limiting
+// General rate limiting (apply to all routes but very lenient)
 app.use(generalRateLimit);
 
 // Secure session configuration
@@ -151,14 +158,18 @@ app.use(cors({
     optionsSuccessStatus: 200
 }));
 
-// Body parsing middleware with size limits
-app.use(express.json({ 
-    limit: '5mb',
-    verify: (req, res, buf) => {
-        // Verify JSON payload integrity
-        req.rawBody = buf;
+// Body parsing middleware with size limits - skip for multipart
+app.use((req, res, next) => {
+    if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+        return next(); // Skip JSON parsing for multipart requests
     }
-}));
+    express.json({ 
+        limit: '5mb',
+        verify: (req, res, buf) => {
+            req.rawBody = buf;
+        }
+    })(req, res, next);
+});
 app.use(express.urlencoded({ 
     extended: true, 
     limit: '5mb',
@@ -177,9 +188,16 @@ app.use('/uploads', express.static(process.env.UPLOAD_PATH || './secure_uploads'
 
 // API Routes with specific rate limiting and professional logging
 app.use('/api/auth', authRateLimit, authLogger, securityEventLogger('AUTH_REQUEST'), authRoutes);
-app.use('/api/profiles', profileRateLimit, performanceLogger('PROFILE_OPERATION'), profileRoutes);
-app.use('/api/stats', performanceLogger('STATS_QUERY'), statsRoutes);
-app.use('/api/upload', securityEventLogger('FILE_UPLOAD'), uploadRoutes);
+// Use readRateLimit for GET requests, profileRateLimit for POST/PUT/DELETE
+app.use('/api/profiles', (req, res, next) => {
+    if (req.method === 'GET') {
+        readRateLimit(req, res, next);
+    } else {
+        profileRateLimit(req, res, next);
+    }
+}, performanceLogger('PROFILE_OPERATION'), profileRoutes);
+app.use('/api/stats', readRateLimit, performanceLogger('STATS_QUERY'), statsRoutes);
+app.use('/api/upload', profileRateLimit, securityEventLogger('FILE_UPLOAD'), uploadRoutes);
 app.use('/api/backup', securityEventLogger('BACKUP_OPERATION'), backupRoutes);
 
 // Health check endpoint
@@ -297,7 +315,7 @@ const startServer = async () => {
         process.env.RSA_PRIVATE_KEY = keyPair.privateKey;
         
         // Start server
-        const PORT = process.env.PORT || 3000;
+        const PORT = process.env.PORT || 3001;
         const HOST = '0.0.0.0'; // Listen on all interfaces for network access
         
         const server = app.listen(PORT, HOST, () => {

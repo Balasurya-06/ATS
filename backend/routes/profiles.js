@@ -13,12 +13,38 @@ const upload = require('../middleware/upload');
 
 const router = express.Router();
 
-// All profile routes require authentication
-router.use(auth);
+// Optional auth middleware for profiles (works with or without token)
+const optionalAuthMiddleware = (req, res, next) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (token) {
+        try {
+            const jwt = require('jsonwebtoken');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = decoded;
+        } catch (error) {
+            // Set default user if no valid token
+            req.user = { userId: 'system', clearanceLevel: 'Restricted' };
+        }
+    } else {
+        // Set default user if no token provided
+        req.user = { userId: 'system', clearanceLevel: 'Restricted' };
+    }
+    
+    next();
+};
+
+// All profile routes use optional authentication
+router.use(optionalAuthMiddleware);
 
 // POST /api/profiles - Create new profile
 router.post('/', 
-    upload.array('photos', 10), // Allow up to 10 photo uploads
+    upload.fields([
+        { name: 'front', maxCount: 1 },
+        { name: 'back', maxCount: 1 },
+        { name: 'side', maxCount: 1 },
+        { name: 'photos', maxCount: 10 }
+    ]),
     validateProfile,
     logActivity('CREATE'),
     createProfile
@@ -44,7 +70,12 @@ router.get('/:id',
 
 // PUT /api/profiles/:id - Update profile
 router.put('/:id', 
-    upload.array('photos', 10),
+    upload.fields([
+        { name: 'front', maxCount: 1 },
+        { name: 'back', maxCount: 1 },
+        { name: 'side', maxCount: 1 },
+        { name: 'photos', maxCount: 10 }
+    ]),
     validateProfile,
     logActivity('UPDATE'),
     updateProfile

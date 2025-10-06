@@ -4,19 +4,49 @@ const ActivityLog = require('../models/ActivityLog');
 // Create new profile
 const createProfile = async (req, res) => {
     try {
-        const profileData = {
-            ...req.validatedData,
-            createdBy: req.user.userId,
-            lastUpdatedBy: req.user.userId
-        };
+        // Parse form data (handle both multipart form data and JSON)
+        const profileData = { ...req.body };
+        
+        // Parse JSON strings if they exist (from multipart form data)
+        ['imeiNumbers', 'children', 'education', 'closeAssociates'].forEach(field => {
+            if (typeof profileData[field] === 'string') {
+                try {
+                    profileData[field] = JSON.parse(profileData[field]);
+                } catch (e) {
+                    // Keep as is if parsing fails
+                }
+            }
+        });
+
+        // Set user info if available
+        if (req.user) {
+            profileData.createdBy = req.user.userId;
+            profileData.lastUpdatedBy = req.user.userId;
+        }
 
         // Handle file uploads if present
-        if (req.files && req.files.length > 0) {
-            profileData.photos = req.files.map(file => file.path);
+        if (req.files) {
+            const photos = {};
+            if (Array.isArray(req.files)) {
+                // Array of files
+                req.files.forEach((file, index) => {
+                    if (index === 0) photos.front = file.path;
+                    else if (index === 1) photos.back = file.path;
+                    else if (index === 2) photos.side = file.path;
+                });
+            } else if (typeof req.files === 'object') {
+                // Named files object
+                if (req.files.front) photos.front = req.files.front[0].path;
+                if (req.files.back) photos.back = req.files.back[0].path;
+                if (req.files.side) photos.side = req.files.side[0].path;
+            }
+            profileData.photos = photos;
         }
 
         const profile = new Profile(profileData);
         await profile.save();
+
+        console.log('✅ Profile created successfully:', profile.profileId);
 
         res.status(201).json({
             success: true,
@@ -90,7 +120,7 @@ const getProfiles = async (req, res) => {
             page: parseInt(page),
             limit: parseInt(limit),
             sort,
-            select: 'profileId fullName age gender radicalizationLevel monitoringStatus fileClassification createdAt lastUpdatedBy'
+            select: 'profileId name dob gender radicalizationLevel monitoringStatus fileClassification createdAt lastUpdatedBy'
         };
 
         const profiles = await Profile.paginate(query, options);
@@ -199,9 +229,22 @@ const updateProfile = async (req, res) => {
         };
 
         // Handle file uploads if present
-        if (req.files && req.files.length > 0) {
-            const newPhotos = req.files.map(file => file.path);
-            updateData.photos = [...(profile.photos || []), ...newPhotos];
+        if (req.files) {
+            const photos = { ...profile.photos };
+            if (Array.isArray(req.files)) {
+                // Array of files
+                req.files.forEach((file, index) => {
+                    if (index === 0) photos.front = file.path;
+                    else if (index === 1) photos.back = file.path;
+                    else if (index === 2) photos.side = file.path;
+                });
+            } else if (typeof req.files === 'object') {
+                // Named files object
+                if (req.files.front) photos.front = req.files.front[0].path;
+                if (req.files.back) photos.back = req.files.back[0].path;
+                if (req.files.side) photos.side = req.files.side[0].path;
+            }
+            updateData.photos = photos;
         }
 
         const updatedProfile = await Profile.findByIdAndUpdate(
@@ -293,13 +336,20 @@ const searchProfiles = async (req, res) => {
 
         switch (type) {
             case 'name':
-                searchQuery.fullName = { $regex: q, $options: 'i' };
+                searchQuery.name = { $regex: q, $options: 'i' };
                 break;
             case 'id':
-                searchQuery.govtIds = { $regex: q, $options: 'i' };
+                searchQuery.$or = [
+                    { aadhar: { $regex: q, $options: 'i' } },
+                    { pan: { $regex: q, $options: 'i' } },
+                    { passport: { $regex: q, $options: 'i' } }
+                ];
                 break;
             case 'contact':
-                searchQuery.contacts = { $regex: q, $options: 'i' };
+                searchQuery.$or = [
+                    { phone: { $regex: q, $options: 'i' } },
+                    { email: { $regex: q, $options: 'i' } }
+                ];
                 break;
             default:
                 searchQuery.$text = { $search: q };
@@ -307,7 +357,7 @@ const searchProfiles = async (req, res) => {
         }
 
         const profiles = await Profile.find(searchQuery)
-            .select('profileId fullName age gender radicalizationLevel monitoringStatus fileClassification')
+            .select('profileId name dob gender radicalizationLevel monitoringStatus fileClassification')
             .limit(50)
             .sort({ score: { $meta: 'textScore' } });
 

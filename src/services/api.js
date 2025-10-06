@@ -76,6 +76,10 @@ class APIService {
                 ...options.headers
             }
         };
+        // Remove Content-Type header for FormData bodies to allow browser to set proper boundary
+        if (options.body instanceof FormData) {
+            delete config.headers['Content-Type'];
+        }
 
         try {
             console.log(`🔐 API Request: ${options.method || 'GET'} ${endpoint}`);
@@ -140,20 +144,27 @@ class APIService {
     /**
      * Profile Management APIs
      */
-    async createProfile(profileData, files = []) {
+    async createProfile(profileData, files = {}) {
         const formData = new FormData();
         
         // Add profile data
         Object.keys(profileData).forEach(key => {
             if (profileData[key] !== undefined && profileData[key] !== null) {
-                formData.append(key, profileData[key]);
+                // Handle arrays/objects by converting to JSON strings
+                if (Array.isArray(profileData[key]) || typeof profileData[key] === 'object') {
+                    formData.append(key, JSON.stringify(profileData[key]));
+                } else {
+                    formData.append(key, profileData[key]);
+                }
             }
         });
         
-        // Add files
-        files.forEach((file, index) => {
-            formData.append('photos', file);
-        });
+        // Add files - handle object format { front, back, side }
+        if (files && typeof files === 'object') {
+            if (files.front) formData.append('front', files.front);
+            if (files.back) formData.append('back', files.back);
+            if (files.side) formData.append('side', files.side);
+        }
         
         // Remove Content-Type header for FormData (browser sets it automatically)
         const headers = { ...this.getAuthHeaders() };

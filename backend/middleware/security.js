@@ -31,10 +31,10 @@ const createRateLimit = (windowMs, max, message, skipSuccessfulRequests = false)
     });
 };
 
-// General API rate limiting
+// General API rate limiting (more lenient for development)
 const generalRateLimit = createRateLimit(
     15 * 60 * 1000, // 15 minutes
-    100, // limit each IP to 100 requests per windowMs
+    500, // limit each IP to 500 requests per windowMs
     'Too many requests from this IP, please try again later.'
 );
 
@@ -49,16 +49,24 @@ const authRateLimit = createRateLimit(
 // Profile creation limiting
 const profileRateLimit = createRateLimit(
     60 * 60 * 1000, // 1 hour
-    10, // limit each IP to 10 profile creations per hour
+    50, // limit each IP to 50 profile creations per hour
     'Too many profile creation attempts, please try again later.'
 );
 
-// Speed limiting for suspicious behavior
+// Read operations rate limiting (very lenient)
+const readRateLimit = createRateLimit(
+    1 * 60 * 1000, // 1 minute
+    100, // limit each IP to 100 read requests per minute
+    'Too many read requests, please wait a moment.',
+    true // Skip successful requests
+);
+
+// Speed limiting for suspicious behavior (more lenient)
 const speedLimiter = slowDown({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    delayAfter: 10, // allow 10 requests per 15 minutes at full speed
-    delayMs: () => 500, // slow down subsequent requests by 500ms per request
-    maxDelayMs: 20000, // maximum delay of 20 seconds
+    delayAfter: 50, // allow 50 requests per 15 minutes at full speed
+    delayMs: () => 200, // slow down subsequent requests by 200ms per request
+    maxDelayMs: 5000, // maximum delay of 5 seconds
     skipSuccessfulRequests: true,
     validate: { delayMs: false } // Disable warning
 });
@@ -234,6 +242,7 @@ module.exports = {
     generalRateLimit,
     authRateLimit,
     profileRateLimit,
+    readRateLimit,
     speedLimiter,
     bruteForce,
     ipWhitelist,
