@@ -14,11 +14,11 @@ function EditProfileModal({ profile, onClose }) {
             left: 0, 
             right: 0, 
             bottom: 0, 
-            backgroundColor: 'rgba(0,0,0,0.7)', 
+            backgroundColor: 'rgba(0,0,0,0.8)', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
-            zIndex: 1000, 
+            zIndex: 9999, 
             padding: '24px' 
         }}>
             <div style={{ 
@@ -26,7 +26,7 @@ function EditProfileModal({ profile, onClose }) {
                 borderRadius: '16px', 
                 maxWidth: '600px', 
                 width: '100%', 
-                boxShadow: '0 20px 60px rgba(0,0,0,0.3)' 
+                boxShadow: '0 20px 60px rgba(0,0,0,0.4)' 
             }}>
                 {/* Modal Header */}
                 <div style={{ 
