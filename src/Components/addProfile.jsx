@@ -113,7 +113,16 @@ function AddProfile({ onBack }) {
         vehicles: 'MH01-AB-1234 (Honda City), MH02-CD-5678 (Royal Enfield Bullet)',
         hideoutPlace: 'Rural areas in Maharashtra, Goa beaches',
         advocate: 'Advocate Ramesh Kumar, Phone: +91-9876543212',
-        arrestDetails: 'Arrested in 2023 for cyber fraud case',
+        arrestDetails: {
+            policeStation: 'Gandhipuram',
+            crimeNoSecLaw: '1/2025 u/s',
+            datePlaceOfArrest: 'Coimbatore',
+            arrestedBy: '',
+            bailOrderDate: '',
+            coAccused: 'Vasu, Mani, Ravi',
+            recoveries: 'Cell phones',
+            category: '',
+        },
         jailActivities: 'Was in Arthur Road Jail for 6 months',
         associatesJail: 'Met Raju Sharma and Vijay Patel during incarceration',
         casesInvolved: '5 cases registered',
@@ -376,9 +385,9 @@ function AddProfile({ onBack }) {
                         <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Basic Details</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <label>Name @ Alias Name (Age)</label>
+                                <label>1. Name @ Alias Name (Age)</label>
                                 <input style={inputStyles.base} value={form.name || ''} onChange={e => handleChange('name', e.target.value)} required />
-                                <label>Case</label>
+                                <label>2. Case</label>
                                 <input style={inputStyles.base} value={form.case || ''} onChange={e => handleChange('case', e.target.value)} />
                                 <label>Photograph (Front)</label>
                                 <input type="file" accept="image/*" onChange={e => handlePhotoChange('front', e.target.files[0])} />
@@ -392,24 +401,24 @@ function AddProfile({ onBack }) {
                         <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Personal Information</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <label>Guardian’s Name & details</label>
+                                <label>2. Guardian’s Name & details</label>
                                 <input style={inputStyles.base} value={form.guardian || ''} onChange={e => handleChange('guardian', e.target.value)} />
-                                <label>Place of Birth</label>
+                                <label>3. Place of Birth</label>
                                 <input style={inputStyles.base} value={form.placeOfBirth || ''} onChange={e => handleChange('placeOfBirth', e.target.value)} />
-                                <label>Date of Birth</label>
+                                <label>4. Date of Birth</label>
                                 <input type="date" style={inputStyles.base} value={form.dob || ''} onChange={e => handleChange('dob', e.target.value)} required />
-                                <label>Gender</label>
+                                <label>5. Gender</label>
                                 <select style={inputStyles.base} value={form.gender || ''} onChange={e => handleChange('gender', e.target.value)} required>
                                     <option value="">Select...</option>
                                     <option>Male</option>
                                     <option>Female</option>
                                     <option>Other</option>
                                 </select>
-                                <label>Marital status</label>
+                                <label>6. Marital status</label>
                                 <input style={inputStyles.base} value={form.maritalStatus || ''} onChange={e => handleChange('maritalStatus', e.target.value)} />
-                                <label>Phone Number</label>
+                                <label>7. Phone Number</label>
                                 <input style={inputStyles.base} value={form.phone || ''} onChange={e => handleChange('phone', e.target.value)} />
-                                <label>IMEI No</label>
+                                <label>8. IMEI No</label>
                                 {form.imeiNumbers.map((val, idx) => (
                                     <div key={idx} style={{ display: 'flex', gap: 4 }}>
                                         <input style={{ ...inputStyles.base, flex: 1 }} value={val} onChange={e => handleListChange('imeiNumbers', idx, null, e.target.value)} />
@@ -424,21 +433,21 @@ function AddProfile({ onBack }) {
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Family Members</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {/* Father, Mother, Brother, Sister, Uncle, Aunt, Wife, Children, Friends, Relatives in wife side */}
-                                <label>Father</label>
+                                <label>9(a). Father</label>
                                 <input style={inputStyles.base} value={form.father || ''} onChange={e => handleChange('father', e.target.value)} />
-                                <label>Mother</label>
+                                <label>9(b). Mother</label>
                                 <input style={inputStyles.base} value={form.mother || ''} onChange={e => handleChange('mother', e.target.value)} />
-                                <label>Brother(s)</label>
+                                <label>9(c). Brother/Brothers</label>
                                 <input style={inputStyles.base} value={form.brothers || ''} onChange={e => handleChange('brothers', e.target.value)} />
-                                <label>Sister(s)</label>
+                                <label>9(d). Sister/Sisters</label>
                                 <input style={inputStyles.base} value={form.sisters || ''} onChange={e => handleChange('sisters', e.target.value)} />
-                                <label>Uncle(s)</label>
+                                <label>9(e). Uncle/Uncles</label>
                                 <input style={inputStyles.base} value={form.uncles || ''} onChange={e => handleChange('uncles', e.target.value)} />
-                                <label>Aunt(s)</label>
+                                <label>9(f). Aunt/Aunts</label>
                                 <input style={inputStyles.base} value={form.aunts || ''} onChange={e => handleChange('aunts', e.target.value)} />
-                                <label>Wife/Wives</label>
+                                <label>9(g). Wife/Wives</label>
                                 <input style={inputStyles.base} value={form.wives || ''} onChange={e => handleChange('wives', e.target.value)} />
-                                <label>Children (Son/Daughter)</label>
+                                <label>9(h). Children (Son/Daughter)</label>
                                 {form.children.map((child, idx) => (
                                     <div key={idx} style={{ display: 'flex', gap: 4 }}>
                                         <select style={{ ...inputStyles.base, flex: 1 }} value={child.gender} onChange={e => handleListChange('children', idx, 'gender', e.target.value)}>
@@ -451,9 +460,9 @@ function AddProfile({ onBack }) {
                                     </div>
                                 ))}
                                 <button type="button" onClick={() => addListItem('children', { gender: '', name: '' })}>Add Child</button>
-                                <label>Close friends</label>
+                                <label>9(j). Close friends</label>
                                 <input style={inputStyles.base} value={form.closeFriends || ''} onChange={e => handleChange('closeFriends', e.target.value)} />
-                                <label>Relatives in wife side</label>
+                                <label>9(j). Relatives in wife side</label>
                                 <input style={inputStyles.base} value={form.relativesWifeSide || ''} onChange={e => handleChange('relativesWifeSide', e.target.value)} />
                             </div>
                         </div>
@@ -461,13 +470,13 @@ function AddProfile({ onBack }) {
                         <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Relatives & Associates</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label>Relations abroad</label>
+                                <label>10. Relations abroad</label>
                                 <input style={inputStyles.base} value={form.relationsAbroad || ''} onChange={e => handleChange('relationsAbroad', e.target.value)} />
-                                <label>Relations in India</label>
+                                <label>11. Relations in India</label>
                                 <input style={inputStyles.base} value={form.relationsIndia || ''} onChange={e => handleChange('relationsIndia', e.target.value)} />
-                                <label>Associates in Pakistan/Bangladesh/Myanmar/Nepal/Abroad</label>
+                                <label>12. Associates in Pakistan/Bangladesh/Myanmar/Nepal/Abroad with Address & Phone No.</label>
                                 <input style={inputStyles.base} value={form.associatesAbroad || ''} onChange={e => handleChange('associatesAbroad', e.target.value)} />
-                                <label>Relatives in Security forces/Govt.</label>
+                                <label>13. Relatives in Security forces (Govt. Central and state)</label>
                                 <input style={inputStyles.base} value={form.relativesSecurity || ''} onChange={e => handleChange('relativesSecurity', e.target.value)} />
                             </div>
                         </div>
@@ -478,29 +487,28 @@ function AddProfile({ onBack }) {
                         <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Background & Address</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <label>Occupation before joining Militancy</label>
+                                <label>14. Occupation before joining Militancy</label>
                                 <input style={inputStyles.base} value={form.occupationBefore || ''} onChange={e => handleChange('occupationBefore', e.target.value)} />
-                                <label>Residential Address</label>
+                                <label>15. Present Address</label>
                                 <input style={inputStyles.base} value={form.presentAddress || ''} onChange={e => handleChange('presentAddress', e.target.value)} placeholder="Present Address" />
+                                <label>15. Permanent Address</label>
                                 <input style={inputStyles.base} value={form.permanentAddress || ''} onChange={e => handleChange('permanentAddress', e.target.value)} placeholder="Permanent Address" />
-                                <label>Place of stay/hideout (last 10 years)</label>
+                                <label>16. Place of stay/hideout with location details during the last 10 years</label>
                                 <input style={inputStyles.base} value={form.hideouts || ''} onChange={e => handleChange('hideouts', e.target.value)} />
-                                <label>Nationality</label>
+                                <label>17. Nationality</label>
                                 <input style={inputStyles.base} value={form.nationality || ''} onChange={e => handleChange('nationality', e.target.value)} />
-                                <label>Religion & Sub-caste</label>
+                                <label>18. Religion & Sub-caste</label>
                                 <input style={inputStyles.base} value={form.religion || ''} onChange={e => handleChange('religion', e.target.value)} />
-                                <label>Blood group</label>
+                                <label>19. Blood group</label>
                                 <input style={inputStyles.base} value={form.bloodGroup || ''} onChange={e => handleChange('bloodGroup', e.target.value)} />
-                                <label>Educational qualification</label>
+                                <label>20. Educational qualification</label>
                                 {form.education.map((edu, idx) => (
-                                    <div key={idx} style={{ display: 'flex', gap: 4 }}>
-                                        <input style={{ ...inputStyles.base, flex: 2 }} value={edu.level} onChange={e => handleListChange('education', idx, 'level', e.target.value)} placeholder="Level (e.g. 1st-5th, Degree)" />
-                                        <input style={{ ...inputStyles.base, flex: 3 }} value={edu.school} onChange={e => handleListChange('education', idx, 'school', e.target.value)} placeholder="School/College Name" />
-                                        <input style={{ ...inputStyles.base, flex: 1 }} value={edu.year} onChange={e => handleListChange('education', idx, 'year', e.target.value)} placeholder="Year" />
-                                        <button type="button" onClick={() => removeListItem('education', idx)} disabled={form.education.length === 1}>-</button>
-                                    </div>
+                                    <input key={idx} style={inputStyles.base} value={edu.level} onChange={e => {
+                                        const newArr = [...form.education];
+                                        newArr[idx].level = e.target.value;
+                                        setForm({ ...form, education: newArr });
+                                    }} placeholder="Level" />
                                 ))}
-                                <button type="button" onClick={() => addListItem('education', { level: '', school: '', year: '' })}>Add Education</button>
                                 <label>Expertise</label>
                                 <input style={inputStyles.base} value={form.expertise || ''} onChange={e => handleChange('expertise', e.target.value)} />
                                 <label>Profession / Occupation/Address of work Telephone Number</label>
@@ -515,19 +523,19 @@ function AddProfile({ onBack }) {
                         <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Identity Cards</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label>Driving License No. / Place of issue</label>
+                                <label>25A. Driving License No. / Place of issue</label>
                                 <input style={inputStyles.base} value={form.dl || ''} onChange={e => handleChange('dl', e.target.value)} />
-                                <label>PAN Number & Name details</label>
+                                <label>25B. PAN Number & Name details</label>
                                 <input style={inputStyles.base} value={form.pan || ''} onChange={e => handleChange('pan', e.target.value)} />
-                                <label>Aadhar Number & Name details</label>
+                                <label>25C. Aadhar Number & Name details</label>
                                 <input style={inputStyles.base} value={form.aadhar || ''} onChange={e => handleChange('aadhar', e.target.value)} />
-                                <label>Passport Number / Issued & Validity date</label>
+                                <label>25D. Passport Number / Issued & Validity date</label>
                                 <input style={inputStyles.base} value={form.passport || ''} onChange={e => handleChange('passport', e.target.value)} />
-                                <label>Voter ID Number & Name details</label>
+                                <label>25E. Voter Id Number & Name details</label>
                                 <input style={inputStyles.base} value={form.voter || ''} onChange={e => handleChange('voter', e.target.value)} />
-                                <label>Ration Card details</label>
+                                <label>25F. Ration Card details</label>
                                 <input style={inputStyles.base} value={form.ration || ''} onChange={e => handleChange('ration', e.target.value)} />
-                                <label>Credit Card</label>
+                                <label>25G. Credit Card</label>
                                 <input style={inputStyles.base} value={form.creditCard || ''} onChange={e => handleChange('creditCard', e.target.value)} />
                             </div>
                         </div>
@@ -535,19 +543,19 @@ function AddProfile({ onBack }) {
                         <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Social Media IDs</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label>Email ID</label>
+                                <label>26A. E-mail Id</label>
                                 <input style={inputStyles.base} value={form.email || ''} onChange={e => handleChange('email', e.target.value)} />
-                                <label>WhatsApp No.</label>
+                                <label>26B. WhatsApp No.</label>
                                 <input style={inputStyles.base} value={form.whatsapp || ''} onChange={e => handleChange('whatsapp', e.target.value)} />
-                                <label>Facebook ID</label>
+                                <label>26C. Facebook Id</label>
                                 <input style={inputStyles.base} value={form.facebook || ''} onChange={e => handleChange('facebook', e.target.value)} />
-                                <label>Instagram ID</label>
+                                <label>26D. Instagram Id</label>
                                 <input style={inputStyles.base} value={form.instagram || ''} onChange={e => handleChange('instagram', e.target.value)} />
-                                <label>Telegram ID</label>
+                                <label>26E. Telegram Id</label>
                                 <input style={inputStyles.base} value={form.telegram || ''} onChange={e => handleChange('telegram', e.target.value)} />
-                                <label>UPI ID & Number</label>
+                                <label>26F. UPI Id & Number</label>
                                 <input style={inputStyles.base} value={form.upi || ''} onChange={e => handleChange('upi', e.target.value)} />
-                                <label>Youtube</label>
+                                <label>26G. Youtube</label>
                                 <input style={inputStyles.base} value={form.youtube || ''} onChange={e => handleChange('youtube', e.target.value)} />
                             </div>
                         </div>
@@ -555,21 +563,21 @@ function AddProfile({ onBack }) {
                         <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Physical & Facial Description</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label>Height (CM’s)</label>
+                                <label>27A. Height (CM's)</label>
                                 <input style={inputStyles.base} value={form.height || ''} onChange={e => handleChange('height', e.target.value)} />
-                                <label>Weight (KG’s)</label>
+                                <label>27B. Weight (KG's)</label>
                                 <input style={inputStyles.base} value={form.weight || ''} onChange={e => handleChange('weight', e.target.value)} />
-                                <label>Body Build</label>
+                                <label>27C. Body Build</label>
                                 <input style={inputStyles.base} value={form.bodyBuild || ''} onChange={e => handleChange('bodyBuild', e.target.value)} />
-                                <label>Colour Complexion</label>
+                                <label>27D. Colour Complexion</label>
                                 <input style={inputStyles.base} value={form.complexion || ''} onChange={e => handleChange('complexion', e.target.value)} />
-                                <label>Hair Colour & length (CM’s)</label>
+                                <label>27E. Hair Colour & length (CM's)</label>
                                 <input style={inputStyles.base} value={form.hair || ''} onChange={e => handleChange('hair', e.target.value)} />
-                                <label>Eye Colour</label>
+                                <label>27F. Eye Colour</label>
                                 <input style={inputStyles.base} value={form.eye || ''} onChange={e => handleChange('eye', e.target.value)} />
-                                <label>Moustache</label>
+                                <label>28G. Moustache</label>
                                 <input style={inputStyles.base} value={form.moustache || ''} onChange={e => handleChange('moustache', e.target.value)} />
-                                <label>Beard</label>
+                                <label>28H. Beard</label>
                                 <input style={inputStyles.base} value={form.beard || ''} onChange={e => handleChange('beard', e.target.value)} />
                             </div>
                         </div>
@@ -580,76 +588,92 @@ function AddProfile({ onBack }) {
                         <div style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', borderRadius: '12px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1e40af', marginBottom: '20px', paddingBottom: '12px', borderBottom: '2px solid #e0e7ff', margin: '0 0 20px 0' }}>Other Details</h2>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <label>Languages Known (Read/Write/Speak)</label>
-                                {/* For brevity, just a textarea for now */}
-                                <textarea style={inputStyles.base} value={form.languagesKnown || ''} onChange={e => handleChange('languagesKnown', e.target.value)} />
-                                <label>Identification Mark</label>
+                                <label>29. Languages Known</label>
+                                <input style={inputStyles.base} value={form.languagesKnown || ''} onChange={e => handleChange('languagesKnown', e.target.value)} />
+                                <label>30. Identification Mark</label>
                                 <input style={inputStyles.base} value={form.identificationMark || ''} onChange={e => handleChange('identificationMark', e.target.value)} />
-                                <label>Dress</label>
+                                <label>31. Dress</label>
                                 <input style={inputStyles.base} value={form.dress || ''} onChange={e => handleChange('dress', e.target.value)} />
-                                <label>Any Specific features/signature mark/Peculiarity</label>
+                                <label>32. Any Specific features/signature mark/Peculiarity</label>
                                 <input style={inputStyles.base} value={form.peculiarity || ''} onChange={e => handleChange('peculiarity', e.target.value)} />
-                                <label>Left handed /Right handed</label>
+                                <label>33. Left handed /Right handed</label>
                                 <input style={inputStyles.base} value={form.handed || ''} onChange={e => handleChange('handed', e.target.value)} />
-                                <label>Specific Physical Peculiarities</label>
+                                <label>34. Specific Physical Peculiarities</label>
                                 <input style={inputStyles.base} value={form.physicalPeculiarity || ''} onChange={e => handleChange('physicalPeculiarity', e.target.value)} />
-                                <label>Style of Speech</label>
+                                <label>35. Style of Speech</label>
                                 <input style={inputStyles.base} value={form.speechStyle || ''} onChange={e => handleChange('speechStyle', e.target.value)} />
-                                <label>Mannerism</label>
+                                <label>36. Mannerism</label>
                                 <input style={inputStyles.base} value={form.mannerism || ''} onChange={e => handleChange('mannerism', e.target.value)} />
-                                <label>Habits (Drinking/Smoking/Tobacco/etc..)</label>
+                                <label>37. Habits (Drinking/Smoking/Tobacco/etc..)</label>
                                 <input style={inputStyles.base} value={form.habits || ''} onChange={e => handleChange('habits', e.target.value)} />
-                                <label>Current where abouts</label>
+                                <label>38. Current where abouts</label>
                                 <input style={inputStyles.base} value={form.whereabouts || ''} onChange={e => handleChange('whereabouts', e.target.value)} />
-                                <label>Illegal activities if any</label>
+                                <label>39. Illegal activities if any</label>
                                 <input style={inputStyles.base} value={form.illegalActivities || ''} onChange={e => handleChange('illegalActivities', e.target.value)} />
-                                <label>Type of activities / M.O</label>
+                                <label>40. Type of activities / M.O</label>
                                 <input style={inputStyles.base} value={form.activitiesType || ''} onChange={e => handleChange('activitiesType', e.target.value)} />
-                                <label>Previous Organization Name & Post</label>
+                                <label>41. Previous Organization Name & Post</label>
                                 <input style={inputStyles.base} value={form.prevOrg || ''} onChange={e => handleChange('prevOrg', e.target.value)} />
-                                <label>Present Organization Name & Post</label>
+                                <label>42. Present Organization Name & Post</label>
                                 <input style={inputStyles.base} value={form.presentOrg || ''} onChange={e => handleChange('presentOrg', e.target.value)} />
-                                <label>Participation in religious activities</label>
+                                <label>43. Participation in religious activities (Mosque/Madrassa/ArabicCollege/Church/Temple, etc..)</label>
                                 <input style={inputStyles.base} value={form.religiousActivities || ''} onChange={e => handleChange('religiousActivities', e.target.value)} />
-                                <label>Whether potential to get radicalized / radicalize others?</label>
+                                <label>44. Whether potential to get radicalized / radicalize others?</label>
                                 <input style={inputStyles.base} value={form.radicalizationPotential || ''} onChange={e => handleChange('radicalizationPotential', e.target.value)} />
-                                <label>Economic status and source of funds</label>
+                                <label>45. Economic status and source of funds</label>
                                 <input style={inputStyles.base} value={form.economicStatus || ''} onChange={e => handleChange('economicStatus', e.target.value)} />
-                                <label>Main Financier(s)</label>
+                                <label>46. Main Financier(s)</label>
                                 <input style={inputStyles.base} value={form.mainFinancier || ''} onChange={e => handleChange('mainFinancier', e.target.value)} />
-                                <label>Countries Visited, Period & Purpose</label>
+                                <label>47. Countries Visited, Period & Purpose</label>
                                 <input style={inputStyles.base} value={form.countriesVisited || ''} onChange={e => handleChange('countriesVisited', e.target.value)} />
-                                <label>Details of Illegal border crossings with routes adopted</label>
+                                <label>48. Details of Illegal border crossings with routes adopted</label>
                                 <input style={inputStyles.base} value={form.illegalCrossings || ''} onChange={e => handleChange('illegalCrossings', e.target.value)} />
-                                <label>Guides/intermediate places of stay used during such crossing</label>
+                                <label>49. Guides/intermediate places of stay used during such crossing with location details</label>
                                 <input style={inputStyles.base} value={form.guides || ''} onChange={e => handleChange('guides', e.target.value)} />
-                                <label>Properties details (Movable/Immovable)</label>
+                                <label>50. Properties details (Movable/Immovable)</label>
                                 <input style={inputStyles.base} value={form.properties || ''} onChange={e => handleChange('properties', e.target.value)} />
-                                <label>Vehicle details with Reg.No</label>
+                                <label>50C. Vehicle details with Reg.No</label>
                                 <input style={inputStyles.base} value={form.vehicles || ''} onChange={e => handleChange('vehicles', e.target.value)} />
-                                <label>Hide out Place</label>
+                                <label>51. Hide out Place</label>
                                 <input style={inputStyles.base} value={form.hideoutPlace || ''} onChange={e => handleChange('hideoutPlace', e.target.value)} />
-                                <label>Name of Advocate & Phone Number</label>
+                                <label>53. Name of Advocate & Phone Number</label>
                                 <input style={inputStyles.base} value={form.advocate || ''} onChange={e => handleChange('advocate', e.target.value)} />
-                                <label>Last/Previous/Recent arrest details</label>
-                                <input style={inputStyles.base} value={form.arrestDetails || ''} onChange={e => handleChange('arrestDetails', e.target.value)} />
-                                <label>Activities in jail</label>
+                                <div style={{ margin: '24px 0', padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1e40af', marginBottom: '12px' }}>54. Last/Previous/Recent Arrest Details</h3>
+                                    <label>54A. Police Station</label>
+                                    <input style={inputStyles.base} value={form.arrestDetails.policeStation} onChange={e => setForm(f => ({ ...f, arrestDetails: { ...f.arrestDetails, policeStation: e.target.value } }))} />
+                                    <label>54B. Crime No. & Sec of Law</label>
+                                    <input style={inputStyles.base} value={form.arrestDetails.crimeNoSecLaw} onChange={e => setForm(f => ({ ...f, arrestDetails: { ...f.arrestDetails, crimeNoSecLaw: e.target.value } }))} />
+                                    <label>54C. Date & Place of arrest</label>
+                                    <input style={inputStyles.base} value={form.arrestDetails.datePlaceOfArrest} onChange={e => setForm(f => ({ ...f, arrestDetails: { ...f.arrestDetails, datePlaceOfArrest: e.target.value } }))} />
+                                    <label>54D. Arrested by</label>
+                                    <input style={inputStyles.base} value={form.arrestDetails.arrestedBy} onChange={e => setForm(f => ({ ...f, arrestDetails: { ...f.arrestDetails, arrestedBy: e.target.value } }))} />
+                                    <label>54E. Bail order & Date</label>
+                                    <input style={inputStyles.base} value={form.arrestDetails.bailOrderDate} onChange={e => setForm(f => ({ ...f, arrestDetails: { ...f.arrestDetails, bailOrderDate: e.target.value } }))} />
+                                    <label>55F. Co-Accused (if Any)</label>
+                                    <input style={inputStyles.base} value={form.arrestDetails.coAccused} onChange={e => setForm(f => ({ ...f, arrestDetails: { ...f.arrestDetails, coAccused: e.target.value } }))} />
+                                    <label>54G. Recoveries</label>
+                                    <input style={inputStyles.base} value={form.arrestDetails.recoveries} onChange={e => setForm(f => ({ ...f, arrestDetails: { ...f.arrestDetails, recoveries: e.target.value } }))} />
+                                    <label>54H. Category <span style={{ fontSize: '12px', color: '#6b7280' }}>(Militants/smuggler/border crosser/courier/sawari/drug peddler/fake currency racketeer etc.)</span></label>
+                                    <input style={inputStyles.base} value={form.arrestDetails.category} onChange={e => setForm(f => ({ ...f, arrestDetails: { ...f.arrestDetails, category: e.target.value } }))} />
+                                </div>
+                                <label>56. Activities in jail</label>
                                 <input style={inputStyles.base} value={form.jailActivities || ''} onChange={e => handleChange('jailActivities', e.target.value)} />
-                                <label>Associates in jail</label>
+                                <label>57. Associates in jail</label>
                                 <input style={inputStyles.base} value={form.associatesJail || ''} onChange={e => handleChange('associatesJail', e.target.value)} />
-                                <label>Total No. of Cases Involved</label>
+                                <label>58. Total No. of Cases Involved</label>
                                 <input style={inputStyles.base} value={form.casesInvolved || ''} onChange={e => handleChange('casesInvolved', e.target.value)} />
-                                <label>Security Proceedings details</label>
+                                <label>59. Security Proceedings details</label>
                                 <input style={inputStyles.base} value={form.securityProceedings || ''} onChange={e => handleChange('securityProceedings', e.target.value)} />
-                                <label>Whether accused presently inside Prison or Out of prison?</label>
+                                <label>60. Whether accused presently inside Prison or Out of prison?</label>
                                 <input style={inputStyles.base} value={form.prisonStatus || ''} onChange={e => handleChange('prisonStatus', e.target.value)} />
-                                <label>Previously Interrogated by which agencies?</label>
+                                <label>61. Previously Interrogated by which agencies?</label>
                                 <input style={inputStyles.base} value={form.interrogatedBy || ''} onChange={e => handleChange('interrogatedBy', e.target.value)} />
-                                <label>Photograph & GPS location of the House with remarks</label>
+                                <label>62. Photograph & GPS location of the House with remarks</label>
                                 <input style={inputStyles.base} value={form.houseGPS || ''} onChange={e => handleChange('houseGPS', e.target.value)} />
-                                <label>Photograph & GPS location of the Workplace with remarks</label>
+                                <label>63. Photograph & GPS location of the Workplace with remarks</label>
                                 <input style={inputStyles.base} value={form.workGPS || ''} onChange={e => handleChange('workGPS', e.target.value)} />
-                                <label>Close Associates with Phone Number</label>
+                                <label>64. Close Associates with Phone Number</label>
                                 {form.closeAssociates.map((a, idx) => (
                                     <div key={idx} style={{ display: 'flex', gap: 4 }}>
                                         <input style={{ ...inputStyles.base, flex: 2 }} value={a.name} onChange={e => handleListChange('closeAssociates', idx, 'name', e.target.value)} placeholder="Name" />
@@ -659,11 +683,11 @@ function AddProfile({ onBack }) {
                                     </div>
                                 ))}
                                 <button type="button" onClick={() => addListItem('closeAssociates', { name: '', address: '', phone: '' })}>Add Associate</button>
-                                <label>A Small video to be taken (3 min, certified by interrogator)</label>
+                                <label>65. A Small video to be taken (3 min, certified by interrogator)</label>
                                 <input style={inputStyles.base} value={form.video || ''} onChange={e => handleChange('video', e.target.value)} />
-                                <label>Verified by</label>
+                                <label>66. Verified by</label>
                                 <input style={inputStyles.base} value={form.verifiedBy || ''} onChange={e => handleChange('verifiedBy', e.target.value)} />
-                                <label>Date of Creation</label>
+                                <label>67. Date of Creation</label>
                                 <input type="date" style={inputStyles.base} value={form.dateOfCreation || ''} onChange={e => handleChange('dateOfCreation', e.target.value)} />
                                 <label>Case Particulars and Stage of the Cases</label>
                                 <textarea style={inputStyles.base} value={form.caseParticulars || ''} onChange={e => handleChange('caseParticulars', e.target.value)} />
