@@ -193,7 +193,12 @@ class APIService {
         // Add profile data
         Object.keys(profileData).forEach(key => {
             if (profileData[key] !== undefined && profileData[key] !== null) {
-                formData.append(key, profileData[key]);
+                // Handle arrays/objects by converting to JSON strings
+                if (Array.isArray(profileData[key]) || typeof profileData[key] === 'object') {
+                    formData.append(key, JSON.stringify(profileData[key]));
+                } else {
+                    formData.append(key, profileData[key]);
+                }
             }
         });
         

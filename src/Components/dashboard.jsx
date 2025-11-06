@@ -3,6 +3,7 @@ import apiService from '../services/api.js';
 import AddProfile from './addProfile.jsx';
 import ViewProfileModal from './Modals/ViewProfileModal.jsx';
 import EditProfileModal from './Modals/EditProfileModal.jsx';
+import LoadingSpinner, { CardLoadingSkeleton, StatCardLoadingSkeleton, TableLoadingSkeleton } from './LoadingSpinner.jsx';
 
 const logoPath = '/src/images/logo.png';
 
@@ -16,6 +17,10 @@ function Dashboard() {
     ]);
     const [profiles, setProfiles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isStatsLoading, setIsStatsLoading] = useState(true);
+    const [isProfilesLoading, setIsProfilesLoading] = useState(false);
+    const [isDashboardProfilesLoading, setIsDashboardProfilesLoading] = useState(true);
+    const [isProfileActionLoading, setIsProfileActionLoading] = useState(false);
     const [error, setError] = useState('');
     const [viewProfile, setViewProfile] = useState(null);
     const [editProfile, setEditProfile] = useState(null);
@@ -26,9 +31,11 @@ function Dashboard() {
     // Load dashboard statistics from backend
     useEffect(() => {
         loadDashboardStats();
+        // Also load recent profiles for dashboard preview
+        loadDashboardProfiles();
     }, []);
 
-    // Load profiles when navigating to profiles page
+    // Load profiles when navigating to profiles page or for dashboard preview
     useEffect(() => {
         if (page === 'profiles') {
             loadProfiles();
@@ -36,7 +43,7 @@ function Dashboard() {
     }, [page]);
 
     const loadDashboardStats = async () => {
-        setIsLoading(true);
+        setIsStatsLoading(true);
         setError('');
 
         try {
@@ -79,12 +86,12 @@ function Dashboard() {
             console.error('❌ Failed to load dashboard stats:', error);
             setError('Failed to load dashboard statistics. Using offline mode.');
         } finally {
-            setIsLoading(false);
+            setIsStatsLoading(false);
         }
     };
 
     const loadProfiles = async () => {
-        setIsLoading(true);
+        setIsProfilesLoading(true);
         setError('');
         try {
             const response = await apiService.getProfiles({ page: 1, limit: 50 });
@@ -102,14 +109,30 @@ function Dashboard() {
             setError('Failed to load profiles.');
             setProfiles([]);
         } finally {
-            setIsLoading(false);
+            setIsProfilesLoading(false);
+        }
+    };
+
+    const loadDashboardProfiles = async () => {
+        setIsDashboardProfilesLoading(true);
+        try {
+            const response = await apiService.getProfiles({ page: 1, limit: 10 });
+            if (response.success && response.data) {
+                const profilesList = response.data.profiles || [];
+                setProfiles(profilesList);
+            }
+        } catch (error) {
+            console.error('❌ Failed to load dashboard profiles:', error);
+            // Don't set error state for dashboard preview failure
+        } finally {
+            setIsDashboardProfilesLoading(false);
         }
     };
 
     // Profile action handlers
     const handleViewProfile = async (profileId) => {
         try {
-            setIsLoading(true);
+            setIsProfileActionLoading(true);
             const response = await apiService.getProfile(profileId);
             if (response.success && response.data) {
                 setViewProfile(response.data.profile);
@@ -120,13 +143,13 @@ function Dashboard() {
             console.error('❌ Failed to view profile:', error);
             setError('Error loading profile details.');
         } finally {
-            setIsLoading(false);
+            setIsProfileActionLoading(false);
         }
     };
 
     const handleEditProfile = async (profileId) => {
         try {
-            setIsLoading(true);
+            setIsProfileActionLoading(true);
             const response = await apiService.getProfile(profileId);
             if (response.success && response.data) {
                 setEditProfile(response.data.profile);
@@ -137,7 +160,7 @@ function Dashboard() {
             console.error('❌ Failed to load profile:', error);
             setError('Error loading profile for editing.');
         } finally {
-            setIsLoading(false);
+            setIsProfileActionLoading(false);
         }
     };
 
@@ -145,6 +168,33 @@ function Dashboard() {
         setDeleteProfileData({ id: profileId, name: profileName });
         setShowPinModal(true);
         setPin('');
+    };
+
+    const handleSaveProfile = async (profileId, updatedData) => {
+        try {
+            setIsProfileActionLoading(true);
+            console.log('🔄 Updating profile:', profileId);
+            console.log('📤 Update data:', updatedData);
+            
+            const response = await apiService.updateProfile(profileId, updatedData);
+            console.log('📥 Update response:', response);
+            
+            if (response.success) {
+                alert('✅ Profile updated successfully.');
+                // Reload profiles and stats after update
+                await loadProfiles();
+                await loadDashboardStats();
+                setEditProfile(null); // Close the modal
+            } else {
+                throw new Error(response.message || 'Failed to update profile');
+            }
+        } catch (error) {
+            console.error('❌ Failed to update profile:', error);
+            alert('❌ Error updating profile: ' + error.message);
+            throw error; // Re-throw to let modal handle loading state
+        } finally {
+            setIsProfileActionLoading(false);
+        }
     };
 
     const confirmDeleteProfile = async () => {
@@ -158,22 +208,26 @@ function Dashboard() {
         }
 
         try {
-            setIsLoading(true);
+            setIsProfileActionLoading(true);
             setShowPinModal(false);
+            
+            console.log('🗑️ Deleting profile:', deleteProfileData);
             const response = await apiService.deleteProfile(deleteProfileData.id);
+            console.log('📥 Delete response:', response);
+            
             if (response.success) {
                 alert('✅ Profile deleted successfully.');
                 // Reload profiles and stats after deletion
-                loadProfiles();
-                loadDashboardStats();
+                await loadProfiles();
+                await loadDashboardStats();
             } else {
-                alert('❌ Failed to delete profile: ' + (response.message || 'Unknown error'));
+                throw new Error(response.message || 'Failed to delete profile');
             }
         } catch (error) {
             console.error('❌ Failed to delete profile:', error);
             alert('❌ Error deleting profile: ' + error.message);
         } finally {
-            setIsLoading(false);
+            setIsProfileActionLoading(false);
             setDeleteProfileData(null);
             setPin('');
         }
@@ -203,22 +257,22 @@ function Dashboard() {
                             </button>
                             <button 
                                 onClick={() => loadProfiles()} 
-                                disabled={isLoading}
+                                disabled={isProfilesLoading}
                                 style={{ 
-                                    background: isLoading ? '#9ca3af' : '#059669', 
+                                    background: isProfilesLoading ? '#9ca3af' : '#059669', 
                                     color: '#ffffff', 
                                     border: 'none', 
                                     borderRadius: '8px', 
                                     padding: '12px 24px', 
                                     fontSize: '14px', 
                                     fontWeight: '500', 
-                                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                                    cursor: isProfilesLoading ? 'not-allowed' : 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px'
                                 }}
                             >
-                                {isLoading ? '⏳' : '🔄'} {isLoading ? 'Refreshing...' : 'Refresh'}
+                                {isProfilesLoading ? '⏳' : '🔄'} {isProfilesLoading ? 'Refreshing...' : 'Refresh'}
                             </button>
                         </div>
                     </div>
@@ -231,15 +285,23 @@ function Dashboard() {
                     )}
 
                     {/* Loading State */}
-                    {isLoading && (
-                        <div style={{ textAlign: 'center', padding: '60px', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                            <div style={{ fontSize: '18px', color: '#6b7280', marginBottom: '12px' }}>⏳ Loading profiles...</div>
-                            <div style={{ fontSize: '14px', color: '#9ca3af' }}>Please wait while we fetch the data</div>
+                    {isProfilesLoading && (
+                        <div style={{ 
+                            backgroundColor: '#ffffff', 
+                            borderRadius: '16px', 
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            padding: '60px'
+                        }}>
+                            <LoadingSpinner 
+                                size="large" 
+                                text="Loading profiles from secure database..." 
+                                overlay={false} 
+                            />
                         </div>
                     )}
 
                     {/* Empty State */}
-                    {!isLoading && profiles.length === 0 && !error && (
+                    {!isProfilesLoading && profiles.length === 0 && !error && (
                         <div style={{ textAlign: 'center', padding: '60px', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                             <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
                             <div style={{ fontSize: '20px', fontWeight: '600', color: '#1e3a8a', marginBottom: '8px' }}>No Profiles Found</div>
@@ -250,8 +312,34 @@ function Dashboard() {
                         </div>
                     )}
 
+                    {/* Profiles List Loading */}
+                    {isProfilesLoading && (
+                        <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '24px' }}>
+                            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e3a8a', marginBottom: '16px' }}>Loading Profiles...</h2>
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Profile ID</th>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Name</th>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Age</th>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Gender</th>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>DOB</th>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Risk Level</th>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Status</th>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Classification</th>
+                                            <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Last Updated</th>
+                                            <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', color: '#4b5563' }}>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <TableLoadingSkeleton rows={8} columns={10} />
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Profiles List */}
-                    {profiles.length > 0 && (
+                    {!isProfilesLoading && profiles.length > 0 && (
                         <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', padding: '24px' }}>
                             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e3a8a', marginBottom: '16px' }}>Registered Profiles ({profiles.length})</h2>
                             <div style={{ overflowX: 'auto' }}>
@@ -328,7 +416,7 @@ function Dashboard() {
                                                         >
                                                             👁 View
                                                         </button>
-                                                        {/* <button 
+                                                        <button 
                                                             onClick={() => handleEditProfile(profile._id)}
                                                             style={{ 
                                                                 background: '#f59e0b', 
@@ -348,22 +436,24 @@ function Dashboard() {
                                                         </button>
                                                         <button 
                                                             onClick={() => handleDeleteProfile(profile._id, profile.name)}
+                                                            disabled={isLoading}
                                                             style={{ 
-                                                                background: '#dc2626', 
+                                                                background: isLoading ? '#9ca3af' : '#dc2626', 
                                                                 color: '#ffffff', 
                                                                 border: 'none', 
                                                                 borderRadius: '6px', 
                                                                 padding: '6px 12px', 
                                                                 fontSize: '12px', 
                                                                 fontWeight: '500', 
-                                                                cursor: 'pointer',
-                                                                transition: 'background-color 0.2s'
+                                                                cursor: isLoading ? 'not-allowed' : 'pointer',
+                                                                transition: 'background-color 0.2s',
+                                                                opacity: isLoading ? 0.6 : 1
                                                             }}
-                                                            onMouseOver={(e) => e.target.style.background = '#b91c1c'}
-                                                            onMouseOut={(e) => e.target.style.background = '#dc2626'}
+                                                            onMouseOver={(e) => !isLoading && (e.target.style.background = '#b91c1c')}
+                                                            onMouseOut={(e) => !isLoading && (e.target.style.background = '#dc2626')}
                                                         >
-                                                            🗑 Delete
-                                                        </button> */}
+                                                            {isLoading ? '⏳' : '🗑'} Delete
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -386,6 +476,7 @@ function Dashboard() {
                 <EditProfileModal 
                     profile={editProfile}
                     onClose={() => setEditProfile(null)}
+                    onSave={handleSaveProfile}
                 />
 
                 {/* PIN Verification Modal for Delete - On Profiles Page */}
@@ -460,25 +551,39 @@ function Dashboard() {
                             <div style={{ padding: '16px 32px', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                                 <button 
                                     onClick={() => { setShowPinModal(false); setDeleteProfileData(null); setPin(''); }} 
-                                    style={{ background: '#6b7280', color: '#ffffff', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    onClick={confirmDeleteProfile}
-                                    disabled={pin.length < 4}
+                                    disabled={isLoading}
                                     style={{ 
-                                        background: pin.length >= 4 ? '#dc2626' : '#9ca3af', 
+                                        background: isLoading ? '#9ca3af' : '#6b7280', 
                                         color: '#ffffff', 
                                         border: 'none', 
                                         borderRadius: '8px', 
                                         padding: '10px 24px', 
                                         fontSize: '14px', 
                                         fontWeight: '500', 
-                                        cursor: pin.length >= 4 ? 'pointer' : 'not-allowed' 
+                                        cursor: isLoading ? 'not-allowed' : 'pointer',
+                                        opacity: isLoading ? 0.6 : 1
                                     }}
                                 >
-                                    🗑 Confirm Delete
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={confirmDeleteProfile}
+                                    disabled={pin.length < 4 || isLoading}
+                                    style={{ 
+                                        background: (pin.length >= 4 && !isLoading) ? '#dc2626' : '#9ca3af', 
+                                        color: '#ffffff', 
+                                        border: 'none', 
+                                        borderRadius: '8px', 
+                                        padding: '10px 24px', 
+                                        fontSize: '14px', 
+                                        fontWeight: '500', 
+                                        cursor: (pin.length >= 4 && !isLoading) ? 'pointer' : 'not-allowed',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    {isLoading ? '⏳' : '🗑'} {isLoading ? 'Deleting...' : 'Confirm Delete'}
                                 </button>
                             </div>
                         </div>
@@ -571,7 +676,10 @@ function Dashboard() {
                     gap: '20px',
                     marginBottom: '40px'
                 }}>
-                    {stats.map((stat, idx) => (
+                    {isStatsLoading ? (
+                        <StatCardLoadingSkeleton cards={4} />
+                    ) : (
+                        stats.map((stat, idx) => (
                         <div key={stat.label} style={{ 
                             background: '#ffffff',
                             borderRadius: '12px', 
@@ -626,7 +734,8 @@ function Dashboard() {
                                 {stat.label}
                             </div>
                         </div>
-                    ))}
+                        ))
+                    )}
                 </div>
 
                 {/* Action Center */}
@@ -785,6 +894,252 @@ function Dashboard() {
                         </button> */}
                     </div>
                 </div>
+
+                {/* Recent Profiles Preview */}
+                <div style={{ 
+                    background: '#ffffff',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                    padding: '32px',
+                    border: '1px solid #e2e8f0',
+                    marginTop: '32px'
+                }}>
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        marginBottom: '24px'
+                    }}>
+                        <div>
+                            <h2 style={{ 
+                                fontSize: '20px',
+                                fontWeight: '600',
+                                color: '#1e293b',
+                                marginBottom: '4px'
+                            }}>
+                                Recent Profiles
+                            </h2>
+                            <p style={{ 
+                                color: '#64748b',
+                                fontSize: '14px',
+                                margin: 0
+                            }}>
+                                Latest registered profiles in the database
+                            </p>
+                        </div>
+                        <button 
+                            onClick={() => setPage('profiles')}
+                            style={{ 
+                                background: '#059669',
+                                color: '#ffffff', 
+                                border: 'none', 
+                                borderRadius: '8px', 
+                                padding: '10px 20px', 
+                                fontSize: '14px', 
+                                fontWeight: '500', 
+                                cursor: 'pointer',
+                                transition: 'background-color 0.2s'
+                            }}
+                            onMouseOver={e => e.target.style.backgroundColor = '#047857'}
+                            onMouseOut={e => e.target.style.backgroundColor = '#059669'}
+                        >
+                            View All Profiles →
+                        </button>
+                    </div>
+
+                    {/* Profiles Table/Cards */}
+                    {isDashboardProfilesLoading ? (
+                        <CardLoadingSkeleton cards={6} />
+                    ) : profiles.length > 0 ? (
+                        <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+                            gap: '16px' 
+                        }}>
+                            {profiles.slice(0, 6).map((profile, index) => (
+                                <div 
+                                    key={profile._id || index} 
+                                    style={{ 
+                                        background: '#f8fafc',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: '12px',
+                                        padding: '20px',
+                                        transition: 'all 0.2s ease',
+                                        cursor: 'pointer'
+                                    }}
+                                    onMouseOver={e => {
+                                        e.target.style.borderColor = '#3b82f6';
+                                        e.target.style.background = '#ffffff';
+                                        e.target.style.transform = 'translateY(-2px)';
+                                        e.target.style.boxShadow = '0 8px 25px rgba(0,0,0,0.1)';
+                                    }}
+                                    onMouseOut={e => {
+                                        e.target.style.borderColor = '#e2e8f0';
+                                        e.target.style.background = '#f8fafc';
+                                        e.target.style.transform = 'translateY(0px)';
+                                        e.target.style.boxShadow = 'none';
+                                    }}
+                                    onClick={() => handleViewProfile(profile._id)}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                                        <div>
+                                            <div style={{ 
+                                                fontSize: '16px', 
+                                                fontWeight: '600', 
+                                                color: '#1e293b',
+                                                marginBottom: '4px'
+                                            }}>
+                                                {profile.name || 'N/A'}
+                                            </div>
+                                            <div style={{ 
+                                                fontSize: '12px', 
+                                                color: '#6b7280',
+                                                fontWeight: '500'
+                                            }}>
+                                                ID: {profile.profileId || 'N/A'}
+                                            </div>
+                                        </div>
+                                        <span style={{ 
+                                            padding: '4px 8px', 
+                                            borderRadius: '6px', 
+                                            fontSize: '11px', 
+                                            fontWeight: '600',
+                                            backgroundColor: profile.radicalizationLevel === 'High' ? '#fecaca' : profile.radicalizationLevel === 'Medium' ? '#fef3c7' : '#d1fae5',
+                                            color: profile.radicalizationLevel === 'High' ? '#991b1b' : profile.radicalizationLevel === 'Medium' ? '#92400e' : '#166534'
+                                        }}>
+                                            {profile.radicalizationLevel || 'Low'} Risk
+                                        </span>
+                                    </div>
+                                    
+                                    <div style={{ 
+                                        display: 'grid', 
+                                        gridTemplateColumns: 'repeat(2, 1fr)', 
+                                        gap: '8px',
+                                        fontSize: '13px',
+                                        color: '#64748b'
+                                    }}>
+                                        <div><strong>Age:</strong> {profile.age || 'N/A'}</div>
+                                        <div><strong>Gender:</strong> {profile.gender || 'N/A'}</div>
+                                        <div><strong>Status:</strong> {profile.monitoringStatus || 'N/A'}</div>
+                                        <div>
+                                            <strong>Classification:</strong> 
+                                            <span style={{ 
+                                                marginLeft: '4px',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                fontSize: '10px',
+                                                fontWeight: '600',
+                                                backgroundColor: profile.fileClassification === 'Top Secret' ? '#7f1d1d' : profile.fileClassification === 'Secret' ? '#dc2626' : '#6b7280',
+                                                color: '#ffffff'
+                                            }}>
+                                                {profile.fileClassification || 'Unclassified'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ 
+                                        marginTop: '12px',
+                                        paddingTop: '12px',
+                                        borderTop: '1px solid #e2e8f0',
+                                        display: 'flex',
+                                        gap: '8px'
+                                    }}>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleViewProfile(profile._id);
+                                            }}
+                                            style={{ 
+                                                background: '#3b82f6', 
+                                                color: '#ffffff', 
+                                                border: 'none', 
+                                                borderRadius: '6px', 
+                                                padding: '6px 12px', 
+                                                fontSize: '11px', 
+                                                fontWeight: '500', 
+                                                cursor: 'pointer',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            onMouseOver={(e) => e.target.style.background = '#2563eb'}
+                                            onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+                                        >
+                                            👁 View
+                                        </button>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleEditProfile(profile._id);
+                                            }}
+                                            style={{ 
+                                                background: '#f59e0b', 
+                                                color: '#ffffff', 
+                                                border: 'none', 
+                                                borderRadius: '6px', 
+                                                padding: '6px 12px', 
+                                                fontSize: '11px', 
+                                                fontWeight: '500', 
+                                                cursor: 'pointer',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            onMouseOver={(e) => e.target.style.background = '#d97706'}
+                                            onMouseOut={(e) => e.target.style.background = '#f59e0b'}
+                                        >
+                                            ✏ Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ 
+                            textAlign: 'center', 
+                            padding: '40px',
+                            color: '#6b7280'
+                        }}>
+                            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+                            <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>No Profiles Found</div>
+                            <div style={{ fontSize: '14px', marginBottom: '20px' }}>Start by adding your first profile to the database</div>
+                            <button 
+                                onClick={() => setPage('add')} 
+                                style={{ 
+                                    background: '#1e40af', 
+                                    color: '#ffffff', 
+                                    border: 'none', 
+                                    borderRadius: '8px', 
+                                    padding: '10px 20px', 
+                                    fontSize: '14px', 
+                                    fontWeight: '500', 
+                                    cursor: 'pointer' 
+                                }}
+                            >
+                                + Add New Profile
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Global Profile Action Loading Overlay */}
+                {isProfileActionLoading && (
+                    <LoadingSpinner 
+                        fullScreen={true}
+                        size="large"
+                        text="Processing profile operation..."
+                        color="#3b82f6"
+                    />
+                )}
+
+                {/* Modals - render on main dashboard too */}
+                <ViewProfileModal 
+                    profile={viewProfile}
+                    onClose={() => setViewProfile(null)}
+                    onEdit={handleEditProfile}
+                />
+
+                <EditProfileModal 
+                    profile={editProfile}
+                    onClose={() => setEditProfile(null)}
+                    onSave={handleSaveProfile}
+                />
 
                 {/* Footer */}
                 <div style={{ 
