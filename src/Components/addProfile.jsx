@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import apiService from '../services/api.js';
+import LoadingSpinner from './LoadingSpinner.jsx';
 
 const logoPath = '/src/images/logo.png';
 
@@ -704,6 +705,16 @@ function AddProfile({ onBack }) {
                     </div>
                 </div>
             </form>
+
+            {/* Loading Overlay */}
+            {isLoading && (
+                <LoadingSpinner 
+                    fullScreen={true}
+                    size="large"
+                    text="Creating profile in secure database..."
+                    color="#7c3aed"
+                />
+            )}
         </div>
     );
 }

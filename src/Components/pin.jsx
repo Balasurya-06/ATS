@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import apiService from '../services/api.js';
+import LoadingSpinner from './LoadingSpinner.jsx';
 
 const logoPath = '/src/images/logo.png';
 
@@ -61,6 +62,16 @@ function PinPage({ onSuccess }) {
         </button>
         {error && <div style={{ color: 'red', marginTop: 8, maxWidth: '300px', textAlign: 'center' }}>{error}</div>}
       </form>
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <LoadingSpinner 
+          overlay={true}
+          size="medium"
+          text="Authenticating access..."
+          color="#1e40af"
+        />
+      )}
     </div>
   );
 }

@@ -18,3 +18,6 @@ export { default as DeleteConfirmModal } from './Modals/DeleteConfirmModal';
 // Main Dashboard
 export { default as Dashboard } from './DashboardNew';
 export { default as AddProfile } from './addProfile';
+
+// Loading Components
+export { default as LoadingSpinner, TableLoadingSkeleton, CardLoadingSkeleton, StatCardLoadingSkeleton } from './LoadingSpinner';
