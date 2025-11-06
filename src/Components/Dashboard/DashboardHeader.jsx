@@ -1,5 +1,4 @@
 import React from 'react';
-
 /**
  * DashboardHeader Component
  * Displays the main header with logo and title
@@ -24,7 +23,7 @@ function DashboardHeader({ logoPath }) {
                     margin: 0,
                     letterSpacing: '-0.25px'
                 }}>
-                    ACCUST Management Console
+                    Terrorism Analysis & Response Information System
                 </h1>
             </div>
             <p style={{ 

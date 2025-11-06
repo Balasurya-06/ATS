@@ -4,7 +4,7 @@ import React from 'react';
  * OperationsCenter Component
  * Displays action buttons for main operations
  */
-function OperationsCenter({ onAddProfile, onViewProfiles }) {
+function OperationsCenter({ onAddProfile }) {
     return (
         <div style={{ 
             background: '#ffffff',
@@ -65,38 +65,6 @@ function OperationsCenter({ onAddProfile, onViewProfiles }) {
                     </div>
                     <div style={{ fontSize: '13px', opacity: '0.9' }}>
                         Register new accused/suspect with complete intelligence data
-                    </div>
-                </button>
-
-                <button 
-                    onClick={onViewProfiles}
-                    style={{ 
-                        background: '#059669',
-                        color: '#ffffff', 
-                        border: 'none', 
-                        borderRadius: '10px', 
-                        padding: '20px', 
-                        fontSize: '15px', 
-                        fontWeight: '500', 
-                        cursor: 'pointer', 
-                        boxShadow: '0 2px 8px rgba(5, 150, 105, 0.2)',
-                        transition: 'all 0.2s ease',
-                        textAlign: 'left'
-                    }}
-                    onMouseOver={e => {
-                        e.target.style.backgroundColor = '#047857';
-                        e.target.style.transform = 'translateY(-1px)';
-                    }}
-                    onMouseOut={e => {
-                        e.target.style.backgroundColor = '#059669';
-                        e.target.style.transform = 'translateY(0px)';
-                    }}
-                >
-                    <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>
-                        Database Access
-                    </div>
-                    <div style={{ fontSize: '13px', opacity: '0.9' }}>
-                        Search, view and manage all registered profiles
                     </div>
                 </button>
             </div>

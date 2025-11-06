@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import apiService from '../services/api.js';
 import LoadingSpinner from './LoadingSpinner.jsx';
 
-const logoPath = '/src/images/logo.png';
+const logoPath = '/src/images/image.png';
 
 function PinPage({ onSuccess }) {
   const [pin, setPin] = useState('');
