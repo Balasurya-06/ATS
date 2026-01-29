@@ -12,6 +12,7 @@
     "secure": "NODE_ENV=production node server.js",
     "backup": "node scripts/backup.js",
     "restore": "node scripts/restore.js",
+    "seed": "node scripts/seedProfile.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

@@ -129,31 +129,31 @@ function ViewProfilePage({ profile, onBack, onEdit }) {
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Full Name</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.name}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.name}</div>
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Date of Birth</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{new Date(profile.dob).toLocaleDateString()}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{new Date(profile.dob).toLocaleDateString()}</div>
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Age</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.age} years</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.age} years</div>
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gender</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.gender}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.gender}</div>
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nationality</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.nationality || 'N/A'}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.nationality || 'N/A'}</div>
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Religion</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.religion || 'N/A'}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.religion || 'N/A'}</div>
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Caste</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.caste || 'N/A'}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.caste || 'N/A'}</div>
                             </div>
                         </div>
                     </div>
@@ -194,7 +194,7 @@ function ViewProfilePage({ profile, onBack, onEdit }) {
                             </div>
                             <div style={{ padding: '20px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '2px solid #e2e8f0' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Monitoring Status</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '12px' }}>{profile.monitoringStatus}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '12px' }}>{profile.monitoringStatus}</div>
                             </div>
                         </div>
                     </div>
@@ -217,15 +217,15 @@ function ViewProfilePage({ profile, onBack, onEdit }) {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mobile</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.mobile || 'N/A'}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px' }}>{profile.mobile || 'N/A'}</div>
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '18px', marginTop: '8px', wordBreak: 'break-word' }}>{profile.email || 'N/A'}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '18px', marginTop: '8px', wordBreak: 'break-word' }}>{profile.email || 'N/A'}</div>
                             </div>
                             <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', gridColumn: '1 / -1' }}>
                                 <strong style={{ color: '#6b7280', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Address</strong>
-                                <div style={{ color: '#374151', fontWeight: '600', fontSize: '16px', marginTop: '8px', lineHeight: '1.6' }}>{profile.address || 'N/A'}</div>
+                                <div style={{ color: '#000000', fontWeight: '600', fontSize: '16px', marginTop: '8px', lineHeight: '1.6' }}>{profile.address || 'N/A'}</div>
                             </div>
                         </div>
                     </div>
@@ -238,15 +238,15 @@ function ViewProfilePage({ profile, onBack, onEdit }) {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', fontSize: '14px' }}>
                             <div>
                                 <strong style={{ color: '#6b7280' }}>Created:</strong>
-                                <div style={{ color: '#374151', marginTop: '4px' }}>{new Date(profile.createdAt).toLocaleString()}</div>
+                                <div style={{ color: '#000000', marginTop: '4px' }}>{new Date(profile.createdAt).toLocaleString()}</div>
                             </div>
                             <div>
                                 <strong style={{ color: '#6b7280' }}>Last Updated:</strong>
-                                <div style={{ color: '#374151', marginTop: '4px' }}>{new Date(profile.updatedAt || profile.createdAt).toLocaleString()}</div>
+                                <div style={{ color: '#000000', marginTop: '4px' }}>{new Date(profile.updatedAt || profile.createdAt).toLocaleString()}</div>
                             </div>
                             <div>
                                 <strong style={{ color: '#6b7280' }}>Updated By:</strong>
-                                <div style={{ color: '#374151', marginTop: '4px' }}>{profile.lastUpdatedBy || 'system'}</div>
+                                <div style={{ color: '#000000', marginTop: '4px' }}>{profile.lastUpdatedBy || 'system'}</div>
                             </div>
                             <div>
                                 <strong style={{ color: '#6b7280' }}>Classification:</strong>

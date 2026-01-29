@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -44,6 +45,8 @@ const profileRoutes = require('./routes/profiles');
 const statsRoutes = require('./routes/stats');
 const uploadRoutes = require('./routes/upload');
 const backupRoutes = require('./routes/backup');
+const analysisRoutes = require('./routes/analysis');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 
@@ -133,29 +136,15 @@ app.use(session({
 }));
 
 // CORS configuration with enhanced security
+// CORS configuration - Simplified for debugging
 app.use(cors({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, etc.)
-        if (!origin) return callback(null, true);
-        
-        const allowedOrigins = process.env.NODE_ENV === 'production' 
-            ? ['http://localhost:3000', 'http://127.0.0.1:3000', '192.168.1.6:3000'] // Add your specific IPs
-            : true;
-        
-        if (allowedOrigins === true) {
-            callback(null, true);
-        } else if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            AuditLogger.logSuspicious('CORS origin blocked', origin, '', { origin });
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true, // Reflects the request origin
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Network-Key', 'Cache-Control', 'Pragma', 'Accept'],
     exposedHeaders: ['X-Request-ID'],
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    preflightContinue: false
 }));
 
 // Body parsing middleware with size limits - skip for multipart
@@ -199,6 +188,8 @@ app.use('/api/profiles', (req, res, next) => {
 app.use('/api/stats', readRateLimit, performanceLogger('STATS_QUERY'), statsRoutes);
 app.use('/api/upload', profileRateLimit, securityEventLogger('FILE_UPLOAD'), uploadRoutes);
 app.use('/api/backup', securityEventLogger('BACKUP_OPERATION'), backupRoutes);
+app.use('/api/analysis', readRateLimit, performanceLogger('ANALYSIS_OPERATION'), analysisRoutes);
+app.use('/api/ai', readRateLimit, aiRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -298,13 +289,21 @@ const startServer = async () => {
         ProfessionalLogger.displayStartupBanner();
         
         // Connect to MongoDB
-        await connectDB();
+        try {
+            await connectDB();
+        } catch (dbError) {
+            console.error('⚠️ MongoDB Connection Failed, but starting server anyway:', dbError.message);
+        }
         
         // Initialize security components
         ProfessionalLogger.logSystem('Server initialization started', 'info');
         
         // Initialize default admin user
-        await initializeAdminUser();
+        try {
+            await initializeAdminUser();
+        } catch (initError) {
+            console.error('⚠️ Admin User Init Warning:', initError.message);
+        }
         
         // Initialize backup system
         ProfessionalLogger.logSystem('Backup system initialized', 'info');
@@ -368,6 +367,15 @@ const startServer = async () => {
                 environment: process.env.NODE_ENV || 'development',
                 securityLevel: 'maximum'
             });
+
+            // 🚀 START BACKGROUND JOB SCHEDULER
+            try {
+                const scheduler = require('./services/backgroundJobs');
+                scheduler.start();
+                console.log('\n✅ Background AI Network Analysis: ACTIVE\n');
+            } catch (error) {
+                console.error('\n⚠️  Background jobs failed:', error.message, '\n');
+            }
 
             // Display comprehensive API documentation
             setTimeout(() => {

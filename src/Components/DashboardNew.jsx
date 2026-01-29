@@ -12,6 +12,7 @@ import ProfilesPage from './Profiles/ProfilesPage';
 import AddProfile from './addProfile.jsx';
 import ViewProfilePage from './Profiles/ViewProfilePage';
 import EditProfilePage from './Profiles/EditProfilePage';
+import LLMChat from './LLMChat.jsx';
 
 // Import Modal Components (only for delete confirmation)
 import DeleteConfirmModal from './Modals/DeleteConfirmModal';
@@ -24,7 +25,7 @@ const logoPath = '/src/images/logo.png';
  */
 function Dashboard() {
     // Navigation State
-    const [page, setPage] = useState('dashboard'); // 'dashboard' | 'add' | 'profiles' | 'viewProfile' | 'editProfile'
+    const [page, setPage] = useState('dashboard'); // 'dashboard' | 'add' | 'profiles' | 'viewProfile' | 'editProfile' | 'chat'
     
     // Data State
     const [stats, setStats] = useState([
@@ -256,6 +257,30 @@ function Dashboard() {
         );
     }
 
+    // Render AI Chat Page
+    if (page === 'chat') {
+        return (
+            <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ padding: '16px', background: 'white', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <button onClick={() => setPage('dashboard')} style={{
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        background: 'white',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        color: '#64748b'
+                    }}>
+                        ← Back to Dashboard
+                    </button>
+                </div>
+                <div style={{ flex: 1 }}>
+                    <LLMChat />
+                </div>
+            </div>
+        );
+    }
+
     // Render View Profile Page
     if (page === 'viewProfile') {
         return (
@@ -324,12 +349,121 @@ function Dashboard() {
         <div style={{ 
             minHeight: '100vh', 
             background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            display: 'flex'
         }}>
-            <SystemBanner />
+            {/* Sidebar Navigation */}
+            <div style={{
+                width: '260px',
+                background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)',
+                borderRight: '1px solid #334155',
+                minHeight: '100vh',
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                zIndex: 1000,
+                boxShadow: '4px 0 12px rgba(0, 0, 0, 0.1)'
+            }}>
+                {/* Logo Section */}
+                <div style={{
+                    padding: '24px 20px',
+                    borderBottom: '1px solid #334155',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                }}>
+                    <img src={logoPath} alt="ACCUST Logo" style={{ width: '40px', height: '40px' }} />
+                    <div>
+                        <div style={{ color: '#fff', fontSize: '18px', fontWeight: '700' }}>ACCUST</div>
+                        <div style={{ color: '#94a3b8', fontSize: '11px' }}>Intelligence System</div>
+                    </div>
+                </div>
 
-            <div style={{ padding: '48px 32px', maxWidth: '1200px', margin: '0 auto' }}>
-                <DashboardHeader logoPath={logoPath} />
+                {/* Navigation Menu */}
+                <nav style={{ padding: '20px 0' }}>
+                    {[
+                        { id: 'dashboard', icon: '📊', label: 'Dashboard', desc: 'Overview & Stats' },
+                        { id: 'profiles', icon: '👥', label: 'All Profiles', desc: 'View all records' },
+                        { id: 'add', icon: '➕', label: 'Add Profile', desc: 'Create new record' },
+                        { id: 'chat', icon: '🤖', label: 'AI Analysis', desc: 'Network analysis' },
+                    ].map(item => (
+                        <button
+                            key={item.id}
+                            onClick={() => setPage(item.id)}
+                            style={{
+                                width: '100%',
+                                padding: '14px 20px',
+                                background: page === item.id ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
+                                border: 'none',
+                                borderLeft: page === item.id ? '3px solid #3b82f6' : '3px solid transparent',
+                                color: page === item.id ? '#fff' : '#cbd5e1',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                transition: 'all 0.2s',
+                                fontSize: '14px',
+                                fontWeight: page === item.id ? '600' : '500',
+                                textAlign: 'left'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (page !== item.id) {
+                                    e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (page !== item.id) {
+                                    e.target.style.background = 'transparent';
+                                }
+                            }}
+                        >
+                            <span style={{ fontSize: '20px' }}>{item.icon}</span>
+                            <div style={{ flex: 1 }}>
+                                <div>{item.label}</div>
+                                <div style={{ 
+                                    fontSize: '11px', 
+                                    color: '#64748b',
+                                    marginTop: '2px'
+                                }}>{item.desc}</div>
+                            </div>
+                        </button>
+                    ))}
+                </nav>
+
+                {/* System Status */}
+                <div style={{
+                    position: 'absolute',
+                    bottom: '20px',
+                    left: '20px',
+                    right: '20px',
+                    padding: '16px',
+                    background: 'rgba(34, 197, 94, 0.1)',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(34, 197, 94, 0.2)'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                        <div style={{
+                            width: '8px',
+                            height: '8px',
+                            background: '#22c55e',
+                            borderRadius: '50%',
+                            animation: 'pulse 2s infinite'
+                        }}></div>
+                        <span style={{ color: '#fff', fontSize: '13px', fontWeight: '600' }}>System Operational</span>
+                    </div>
+                    <div style={{ color: '#94a3b8', fontSize: '11px' }}>
+                        Server: Online<br/>
+                        Last backup: 2 hours ago
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div style={{ marginLeft: '260px', flex: 1 }}>
+                <SystemBanner />
+
+                <div style={{ padding: '48px 32px', maxWidth: '1200px', margin: '0 auto' }}>
+                    <DashboardHeader logoPath={logoPath} />
 
                 {/* Error Display */}
                 {error && (
@@ -361,6 +495,7 @@ function Dashboard() {
                 <OperationsCenter 
                     onAddProfile={() => setPage('add')}
                     onViewProfiles={() => setPage('profiles')}
+                    onAIChat={() => setPage('chat')}
                 />
 
                 {/* Footer */}
@@ -378,6 +513,7 @@ function Dashboard() {
                         Last system update: January 2025 | Server status: Online
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );

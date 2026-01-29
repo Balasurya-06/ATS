@@ -8,31 +8,35 @@ const professionalAPILogger = (req, res, next) => {
 
     // Override res.send to capture response
     res.send = function(data) {
-        const duration = Date.now() - startTime;
-        const userId = req.user?.userId || 'anonymous';
-        
-        // Extract useful information from request
-        const details = {
-            ip: req.ip || req.connection.remoteAddress,
-            userAgent: req.headers['user-agent'],
-            contentLength: req.headers['content-length'],
-            origin: req.headers['origin'],
-            referer: req.headers['referer'],
-            networkKey: req.headers['x-network-key'] ? '✓ Valid' : '✗ Missing',
-            responseSize: typeof data === 'string' ? data.length : JSON.stringify(data).length,
-            query: Object.keys(req.query).length > 0 ? req.query : undefined,
-            body: req.method !== 'GET' && req.body ? Object.keys(req.body).join(', ') : undefined
-        };
+        try {
+            const duration = Date.now() - startTime;
+            const userId = req.user?.userId || 'anonymous';
+            
+            // Extract useful information from request
+            const details = {
+                ip: req.ip || req.connection.remoteAddress,
+                userAgent: req.headers['user-agent'],
+                contentLength: req.headers['content-length'],
+                origin: req.headers['origin'],
+                referer: req.headers['referer'],
+                networkKey: req.headers['x-network-key'] ? '✓ Valid' : '✗ Missing',
+                responseSize: typeof data === 'string' ? data.length : (data ? JSON.stringify(data).length : 0),
+                query: Object.keys(req.query).length > 0 ? req.query : undefined,
+                body: req.method !== 'GET' && req.body ? Object.keys(req.body).join(', ') : undefined
+            };
 
-        // Log the API call with beautiful formatting
-        ProfessionalLogger.logAPICall(
-            req.method,
-            req.originalUrl,
-            res.statusCode,
-            duration,
-            userId,
-            details
-        );
+            // Log the API call with beautiful formatting
+            ProfessionalLogger.logAPICall(
+                req.method,
+                req.originalUrl,
+                res.statusCode,
+                duration,
+                userId,
+                details
+            );
+        } catch (error) {
+            console.error('Logging error in res.send:', error.message);
+        }
 
         // Call original send
         originalSend.call(this, data);
@@ -40,39 +44,49 @@ const professionalAPILogger = (req, res, next) => {
 
     // Override res.json to capture JSON responses
     res.json = function(data) {
-        const duration = Date.now() - startTime;
-        const userId = req.user?.userId || 'anonymous';
-        
-        const details = {
-            ip: req.ip || req.connection.remoteAddress,
-            userAgent: req.headers['user-agent'],
-            networkKey: req.headers['x-network-key'] ? '✓ Valid' : '✗ Missing',
-            responseSize: (() => {
-                try {
-                    if (!data) return 0;
-                    if (typeof data === 'string') return data.length;
-                    const jsonString = JSON.stringify(data);
-                    if (jsonString && jsonString.length > 1000000) {
-                        return 'Large response (>1MB)';
+        try {
+            const duration = Date.now() - startTime;
+            const userId = req.user?.userId || 'anonymous';
+            
+            const details = {
+                ip: req.ip || req.connection.remoteAddress,
+                userAgent: req.headers['user-agent'],
+                networkKey: req.headers['x-network-key'] ? '✓ Valid' : '✗ Missing',
+                responseSize: (() => {
+                    try {
+                        if (!data) return 0;
+                        if (typeof data === 'string') return data.length;
+                        
+                        // Safe stringify check
+                        try {
+                            const jsonString = JSON.stringify(data);
+                            if (jsonString && jsonString.length > 1000000) {
+                                return 'Large response (>1MB)';
+                            }
+                            return jsonString ? jsonString.length : 0;
+                        } catch (e) {
+                             return 'Error calculating size';
+                        }
+                    } catch (error) {
+                        return 'Error calculating size';
                     }
-                    return jsonString ? jsonString.length : 0;
-                } catch (error) {
-                    return 'Error calculating size';
-                }
-            })(),
-            success: data.success !== undefined ? data.success : res.statusCode < 400,
-            query: Object.keys(req.query).length > 0 ? req.query : undefined,
-            body: req.method !== 'GET' && req.body ? Object.keys(req.body).join(', ') : undefined
-        };
+                })(),
+                success: data && data.success !== undefined ? data.success : res.statusCode < 400,
+                query: Object.keys(req.query).length > 0 ? req.query : undefined,
+                body: req.method !== 'GET' && req.body ? Object.keys(req.body).join(', ') : undefined
+            };
 
-        ProfessionalLogger.logAPICall(
-            req.method,
-            req.originalUrl,
-            res.statusCode,
-            duration,
-            userId,
-            details
-        );
+            ProfessionalLogger.logAPICall(
+                req.method,
+                req.originalUrl,
+                res.statusCode,
+                duration,
+                userId,
+                details
+            );
+        } catch (error) {
+             console.error('Logging error in res.json:', error.message);
+        }
 
         originalJson.call(this, data);
     };
@@ -86,7 +100,8 @@ const securityEventLogger = (eventType) => {
         const originalSend = res.send;
         const originalJson = res.json;
 
-        res.send = res.json = function(data) {
+        // Override res.send
+        res.send = function(data) {
             const success = res.statusCode < 400;
             const level = success ? 'info' : 'warn';
 
@@ -101,11 +116,28 @@ const securityEventLogger = (eventType) => {
                 timestamp: new Date().toISOString()
             });
 
-            if (originalSend === res.send) {
-                originalSend.call(this, data);
-            } else {
-                originalJson.call(this, data);
-            }
+            // Call the original send method
+            return originalSend.call(this, data);
+        };
+
+        // Override res.json
+        res.json = function(data) {
+            const success = res.statusCode < 400;
+            const level = success ? 'info' : 'warn';
+
+            ProfessionalLogger.logSecurity(eventType, level, {
+                method: req.method,
+                endpoint: req.originalUrl,
+                ip: req.ip || req.connection.remoteAddress,
+                userAgent: req.headers['user-agent'],
+                userId: req.user?.userId || 'anonymous',
+                statusCode: res.statusCode,
+                success,
+                timestamp: new Date().toISOString()
+            });
+
+            // Call the original json method
+            return originalJson.call(this, data);
         };
 
         next();
@@ -139,7 +171,8 @@ const authLogger = (req, res, next) => {
     const originalSend = res.send;
     const originalJson = res.json;
 
-    res.send = res.json = function(data) {
+    // Override res.send
+    res.send = function(data) {
         const success = res.statusCode < 400;
         const action = req.path.includes('login') ? 'LOGIN' : 
                       req.path.includes('verify') ? 'TOKEN_VERIFY' : 
@@ -159,11 +192,33 @@ const authLogger = (req, res, next) => {
             }
         );
 
-        if (originalSend === res.send) {
-            originalSend.call(this, data);
-        } else {
-            originalJson.call(this, data);
-        }
+        // Call the original send method
+        return originalSend.call(this, data);
+    };
+
+    // Override res.json
+    res.json = function(data) {
+        const success = res.statusCode < 400;
+        const action = req.path.includes('login') ? 'LOGIN' : 
+                      req.path.includes('verify') ? 'TOKEN_VERIFY' : 
+                      'AUTH_ACTION';
+
+        ProfessionalLogger.logAuth(
+            action,
+            req.body?.userId || req.user?.userId || 'unknown',
+            req.ip || req.connection.remoteAddress,
+            req.headers['user-agent'],
+            success,
+            {
+                endpoint: req.originalUrl,
+                method: req.method,
+                statusCode: res.statusCode,
+                hasNetworkKey: !!req.headers['x-network-key']
+            }
+        );
+
+        // Call the original json method
+        return originalJson.call(this, data);
     };
 
     next();

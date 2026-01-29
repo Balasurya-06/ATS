@@ -48,6 +48,16 @@ const createProfile = async (req, res) => {
 
         console.log('✅ Profile created successfully:', profile.profileId);
 
+        // 🔥 AUTO-TRIGGER: Immediate linkage analysis for new profile
+        try {
+            const scheduler = require('../services/backgroundJobs');
+            scheduler.triggerImmediateAnalysis(profile.profileId).catch(err => {
+                console.error('⚠️  Background analysis failed:', err.message);
+            });
+        } catch (err) {
+            console.log('ℹ️  Background jobs not available');
+        }
+
         res.status(201).json({
             success: true,
             message: 'Profile created successfully',

@@ -22,8 +22,6 @@ function PinPage({ onSuccess }) {
 
     // Only allow PIN 2552
     if (pin === '2552') {
-      // Optionally, call backend for logging or session
-      // await apiService.login('2552');
       onSuccess();
     } else {
       setError('Wrong pass. Please try again.');

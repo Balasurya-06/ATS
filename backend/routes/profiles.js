@@ -23,12 +23,12 @@ const optionalAuthMiddleware = (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             req.user = decoded;
         } catch (error) {
-            // Set default user if no valid token
-            req.user = { userId: 'system', clearanceLevel: 'Restricted' };
+            // Set default user with full access if no valid token
+            req.user = { userId: 'system', clearanceLevel: 'Top Secret' };
         }
     } else {
-        // Set default user if no token provided
-        req.user = { userId: 'system', clearanceLevel: 'Restricted' };
+        // Set default user with full access if no token provided
+        req.user = { userId: 'system', clearanceLevel: 'Top Secret' };
     }
     
     next();

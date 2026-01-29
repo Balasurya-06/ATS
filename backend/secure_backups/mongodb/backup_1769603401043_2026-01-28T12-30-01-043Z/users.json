@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "691d1ef9cf24eb0820292e07",
+    "userId": "admin",
+    "pin": "$2a$12$uVF0rEhkNsARKf36dx3WM.GHAuhI50lrU..VzJmjUpJpC5BKyqVbq",
+    "role": "admin",
+    "fullName": "System Administrator",
+    "department": "ACCUST Management",
+    "clearanceLevel": "Top Secret",
+    "isActive": true,
+    "loginAttempts": 0,
+    "createdAt": "2025-11-19T01:35:53.725Z",
+    "updatedAt": "2025-11-19T01:35:53.725Z",
+    "__v": 0
+  }
+]

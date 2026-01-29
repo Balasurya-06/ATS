@@ -235,6 +235,10 @@ class APIService {
         return await this.makeRequest('/stats/health');
     }
 
+    async getAllLinkages(limit = 200) {
+        return await this.makeRequest(`/analysis/all?limit=${limit}`);
+    }
+
     /**
      * File Upload APIs
      */

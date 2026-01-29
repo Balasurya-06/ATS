@@ -6,24 +6,14 @@
     "auditLog": "audit_logs\\access\\.469746268547849e902fd9bbf70994b3830e9eb4-audit.json",
     "files": [
         {
-            "date": 1758989999433,
-            "name": "audit_logs\\access\\access-2025-09-27.log",
-            "hash": "9d15ac313e23fba57142fba4e80475fc6842f2be9fffe9f112586f397baa6b44"
+            "date": 1769579749871,
+            "name": "audit_logs\\access\\access-2026-01-28.log",
+            "hash": "b7e60351f9f962e9b2240ebd3373280d41446a0fca5ba3581ce15b33132392cd"
         },
         {
-            "date": 1759160329959,
-            "name": "audit_logs\\access\\access-2025-09-29.log",
-            "hash": "ef8b0d093941a81a15607673bd6730fd75e7d66d4365fa5b04c14347d7d3db35"
-        },
-        {
-            "date": 1759195428846,
-            "name": "audit_logs\\access\\access-2025-09-30.log",
-            "hash": "1477c30f659835ceb4dab243b66c4faf35712d605c064960019c7729a48a835c"
-        },
-        {
-            "date": 1759763418979,
-            "name": "audit_logs\\access\\access-2025-10-06.log",
-            "hash": "3d8b11eb06bf74fdeaeefced95e3b3f42ff9eff0816a5fc9263a00e1e202832c"
+            "date": 1769670044405,
+            "name": "audit_logs\\access\\access-2026-01-29.log",
+            "hash": "f248151f44a333007abb22c92a8f1e5e91a23d9d8039674b58687f9c2cef78ae"
         }
     ],
     "hashType": "sha256"

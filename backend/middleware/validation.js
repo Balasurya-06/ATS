@@ -3,6 +3,7 @@ const Joi = require('joi');
 const profileValidation = Joi.object({
     // Basic Details - Required fields
     name: Joi.string().min(2).max(200).required(),
+    alias: Joi.string().max(200).allow('', null),
     dob: Joi.date().max('now').required(),
     gender: Joi.string().valid('Male', 'Female', 'Other').required(),
     
@@ -117,6 +118,7 @@ const profileValidation = Joi.object({
     properties: Joi.string().max(2000).allow('', null),
     vehicles: Joi.string().max(1000).allow('', null),
     hideoutPlace: Joi.string().max(1000).allow('', null),
+    fingerPrint: Joi.string().max(1000).allow('', null),
     advocate: Joi.string().max(500).allow('', null),
     arrestDetails: Joi.string().max(2000).allow('', null),
     jailActivities: Joi.string().max(2000).allow('', null),

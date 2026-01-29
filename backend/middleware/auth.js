@@ -44,7 +44,11 @@ const logActivity = (action, targetType = 'Profile') => {
             };
 
             if (res.statusCode >= 400) {
-                logData.errorMessage = typeof data === 'string' ? data : JSON.stringify(data);
+                try {
+                    logData.errorMessage = typeof data === 'string' ? data : JSON.stringify(data);
+                } catch (e) {
+                    logData.errorMessage = 'Could not stringify error response';
+                }
             }
 
             ActivityLog.create(logData).catch(err => 
