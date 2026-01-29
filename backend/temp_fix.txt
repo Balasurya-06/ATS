@@ -97,13 +97,6 @@ function checkArrayMatch(arr1, arr2, fieldGetter = (item) => item) {
 async function detectComprehensiveLinkages(profile1, profile2) {
     if (profile1._id.equals(profile2._id)) return null;
     
-    // Helper to create matched field with proper schema format
-    const addMatch = (field, val1, val2, sim) => {
-        const strVal1 = val1 && typeof val1 === 'object' ? JSON.stringify(val1) : String(val1 || '');
-        const strVal2 = val2 && typeof val2 === 'object' ? JSON.stringify(val2) : String(val2 || '');
-        return { field, value1: strVal1, value2: strVal2, similarity: sim };
-    };
-    
     const linkages = [];
     const matchedFields = [];
     let totalSuspicion = 0;
@@ -117,7 +110,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     if (profile1.phone && profile2.phone && profile1.phone === profile2.phone) {
         contactScore += 100;
         contactCount++;
-        matchedFields.push(addMatch('Phone', profile1.phone, profile2.phone, 1.0));
+        matchedFields.push({ field: 'Phone', value1: String(profile1.phone || ''), value2: String(profile2.profile1.phone?.replace?.('profile1.', '') || ''), similarity: 1.0 });
     }
 
     // IMEI
@@ -129,21 +122,21 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     if (commonIMEI.length > 0) {
         contactScore += 100;
         contactCount++;
-        matchedFields.push(addMatch('IMEI', commonIMEI[0], commonIMEI[0], 1.0));
+        matchedFields.push({ field: 'IMEI', value1: String(commonIMEI[0] || ''), value2: String(profile2.commonIMEI[0]?.replace?.('profile1.', '') || ''), similarity: 1.0 });
     }
 
     // Email
     if (profile1.email && profile2.email && profile1.email.toLowerCase() === profile2.email.toLowerCase()) {
         contactScore += 95;
         contactCount++;
-        matchedFields.push(addMatch('Email', profile1.email, profile2.email, 1.0));
+        matchedFields.push({ field: 'Email', value1: String(profile1.email || ''), value2: String(profile2.profile1.email?.replace?.('profile1.', '') || ''), similarity: 1.0 });
     }
 
     // WhatsApp
     if (profile1.whatsapp && profile2.whatsapp && profile1.whatsapp === profile2.whatsapp) {
         contactScore += 90;
         contactCount++;
-        matchedFields.push(addMatch('WhatsApp', profile1.whatsapp, profile2.whatsapp, 1.0));
+        matchedFields.push({ field: 'WhatsApp', value1: String(profile1.whatsapp || ''), value2: String(profile2.profile1.whatsapp?.replace?.('profile1.', '') || ''), similarity: 1.0 });
     }
 
     // Facebook, Instagram, Telegram, YouTube
@@ -154,7 +147,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
             if (sim > 0.8) {
                 contactScore += 85 * sim;
                 contactCount++;
-                matchedFields.push(addMatch(platform.toUpperCase(), profile1[platform], profile2[platform], sim));
+                matchedFields.push({ field: platform.toUpperCase(), value: profile1[platform], sim });
             }
         }
     }
@@ -163,7 +156,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     if (profile1.upi && profile2.upi && profile1.upi === profile2.upi) {
         contactScore += 95;
         contactCount++;
-        matchedFields.push(addMatch('UPI', profile1.upi, profile2.upi, 1.0));
+        matchedFields.push({ field: 'UPI', value1: String(profile1.upi || ''), value2: String(profile2.profile1.upi?.replace?.('profile1.', '') || ''), similarity: 1.0 });
     }
 
     if (contactCount > 0) {
@@ -185,7 +178,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.7) {
             locationScore += sim * 100;
             locationCount++;
-            matchedFields.push(addMatch('Present Address', profile1.presentAddress, profile2.presentAddress, sim));
+            matchedFields.push({ field: 'Present Address', value: profile1.presentAddress, sim });
         }
     }
 
@@ -195,7 +188,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.7) {
             locationScore += sim * 95;
             locationCount++;
-            matchedFields.push(addMatch('Permanent Address', profile1.permanentAddress, profile2.permanentAddress, sim));
+            matchedFields.push({ field: 'Permanent Address', value: profile1.permanentAddress, sim });
         }
     }
 
@@ -206,7 +199,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
             const sim = Math.max(0, 1 - (dist / 1));
             locationScore += sim * 100;
             locationCount++;
-            matchedFields.push(addMatch('House GPS (< 1km)', profile1.houseGPS?.gpsLocation, profile2.houseGPS?.gpsLocation, sim));
+            matchedFields.push({ field: 'House GPS (< 1km)', value: `${dist.toFixed(2)}km apart`, sim });
         }
     }
 
@@ -216,7 +209,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
             const sim = Math.max(0, 1 - (dist / 2));
             locationScore += sim * 85;
             locationCount++;
-            matchedFields.push(addMatch('Work GPS', profile1.workGPS, profile2.workGPS, sim));
+            matchedFields.push({ field: 'Work GPS', value: `${dist.toFixed(2)}km apart`, sim });
         }
     }
 
@@ -226,7 +219,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.6) {
             locationScore += sim * 90;
             locationCount++;
-            matchedFields.push(addMatch('Hideouts', profile1.hideouts, profile2.hideouts, sim));
+            matchedFields.push({ field: 'Hideouts', value: profile1.hideouts, sim });
         }
     }
 
@@ -236,7 +229,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.8) {
             locationScore += sim * 70;
             locationCount++;
-            matchedFields.push(addMatch('Place of Birth', profile1.placeOfBirth, profile2.placeOfBirth, sim));
+            matchedFields.push({ field: 'Place of Birth', value: profile1.placeOfBirth, sim });
         }
     }
 
@@ -246,7 +239,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.7) {
             locationScore += sim * 75;
             locationCount++;
-            matchedFields.push(addMatch('Properties', profile1.properties, profile2.properties, sim));
+            matchedFields.push({ field: 'Properties', value: profile1.properties, sim });
         }
     }
 
@@ -256,7 +249,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.7) {
             locationScore += sim * 80;
             locationCount++;
-            matchedFields.push(addMatch('Whereabouts', profile1.whereabouts, profile2.whereabouts, sim));
+            matchedFields.push({ field: 'Whereabouts', value: profile1.whereabouts, sim });
         }
     }
 
@@ -279,7 +272,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.85) {
             familyScore += sim * 100;
             familyCount++;
-            matchedFields.push(addMatch('Father', profile1.father, profile2.father, sim));
+            matchedFields.push({ field: 'Father', value: profile1.father, sim });
         }
     }
 
@@ -289,7 +282,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.85) {
             familyScore += sim * 100;
             familyCount++;
-            matchedFields.push(addMatch('Mother', profile1.mother, profile2.mother, sim));
+            matchedFields.push({ field: 'Mother', value: profile1.mother, sim });
         }
     }
 
@@ -299,7 +292,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         if (sim > 0.8) {
             familyScore += sim * 90;
             familyCount++;
-            matchedFields.push(addMatch('Guardian', profile1.guardian, profile2.guardian, sim));
+            matchedFields.push({ field: 'Guardian', value: profile1.guardian, sim });
         }
     }
 
@@ -311,7 +304,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
             if (sim > 0.7) {
                 familyScore += sim * 85;
                 familyCount++;
-                matchedFields.push(addMatch(field.charAt(0).toUpperCase() + field.slice(1), profile1[field], profile2[field], sim));
+                matchedFields.push({ field: field.charAt(0).toUpperCase() + field.slice(1), value: profile1[field], sim });
             }
         }
     }
@@ -324,7 +317,7 @@ if (profile1[field] && profile2[field]) {
             if (sim > 0.7) {
                 familyScore += sim * 75;
                 familyCount++;
-                matchedFields.push(addMatch(field.replace(/([A-Z])/g, ' $1').trim(), profile1[field], profile2[field], sim));
+                matchedFields.push({ field: field.replace(/([A-Z])/g, ' $1').trim(), value: profile1[field], sim });
             }
         }
     }
@@ -335,7 +328,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.7) {
             familyScore += sim * 80;
             familyCount++;
-            matchedFields.push(addMatch('Close Friends', profile1.closeFriends, profile2.closeFriends, sim));
+            matchedFields.push({ field: 'Close Friends', value: profile1.closeFriends, sim });
         }
     }
 
@@ -345,7 +338,7 @@ if (profile1[field] && profile2[field]) {
         if (match) {
             familyScore += 90 * match.similarity;
             familyCount++;
-            matchedFields.push(addMatch('Close Associate', match.value, match.value, match.similarity));
+            matchedFields.push({ field: 'Close Associate', value1: String(match.value || ''), value2: String(profile2.match.value?.replace?.('profile1.', '') || ''), similarity: match.similarity });
         }
     }
 
@@ -355,7 +348,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.7) {
             familyScore += sim * 85;
             familyCount++;
-            matchedFields.push(addMatch('Associates Abroad', profile1.associatesAbroad, profile2.associatesAbroad, sim));
+            matchedFields.push({ field: 'Associates Abroad', value: profile1.associatesAbroad, sim });
         }
     }
 
@@ -377,7 +370,7 @@ if (profile1[field] && profile2[field]) {
         if (profile1[field] && profile2[field] && profile1[field] === profile2[field]) {
             identityScore += 100;
             identityCount++;
-            matchedFields.push(addMatch(field.toUpperCase() + ' (CRITICAL)', profile1[field], profile2[field], 1.0));
+            matchedFields.push({ field: field.toUpperCase() + ' (CRITICAL)', value: profile1[field], sim: 1.0 });
         }
     }
 
@@ -387,7 +380,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.8) {
             identityScore += sim * 95;
             identityCount++;
-            matchedFields.push(addMatch('Bank Details', profile1.bankDetails, profile2.bankDetails, sim));
+            matchedFields.push({ field: 'Bank Details', value: profile1.bankDetails, sim });
         }
     }
 
@@ -395,7 +388,7 @@ if (profile1[field] && profile2[field]) {
     if (profile1.fingerPrint && profile2.fingerPrint && profile1.fingerPrint === profile2.fingerPrint) {
         identityScore += 100;
         identityCount++;
-        matchedFields.push(addMatch('Fingerprint (CRITICAL)', 'Match', 'Match', 1.0));
+        matchedFields.push({ field: 'Fingerprint (CRITICAL)', value1: String('Match' || ''), value2: String(profile2.'Match'?.replace?.('profile1.', '') || ''), similarity: 1.0 });
     }
 
     // Advocate
@@ -404,7 +397,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.8) {
             identityScore += sim * 70;
             identityCount++;
-            matchedFields.push(addMatch('Advocate', profile1.advocate, profile2.advocate, sim));
+            matchedFields.push({ field: 'Advocate', value: profile1.advocate, sim });
         }
     }
 
@@ -429,7 +422,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.8) {
             activityScore += sim * 90;
             activityCount++;
-            matchedFields.push(addMatch('Organization', org1, org2, sim));
+            matchedFields.push({ field: 'Organization', value: org1, sim });
         }
     }
 
@@ -441,7 +434,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.8) {
             activityScore += sim * 80;
             activityCount++;
-            matchedFields.push(addMatch('Previous Organization', prevOrg1, prevOrg2, sim));
+            matchedFields.push({ field: 'Previous Organization', value: prevOrg1, sim });
         }
     }
 
@@ -451,7 +444,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.7) {
             activityScore += sim * 75;
             activityCount++;
-            matchedFields.push(addMatch('Religious Activities', profile1.religiousActivities, profile2.religiousActivities, sim));
+            matchedFields.push({ field: 'Religious Activities', value: profile1.religiousActivities, sim });
         }
     }
 
@@ -461,7 +454,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.6) {
             activityScore += sim * 95;
             activityCount++;
-            matchedFields.push(addMatch('Illegal Activities (HIGH RISK)', profile1.illegalActivities, profile2.illegalActivities, sim));
+            matchedFields.push({ field: 'Illegal Activities (HIGH RISK)', value: profile1.illegalActivities, sim });
         }
     }
 
@@ -471,7 +464,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.8) {
             activityScore += sim * 90;
             activityCount++;
-            matchedFields.push(addMatch('Main Financier', profile1.mainFinancier, profile2.mainFinancier, sim));
+            matchedFields.push({ field: 'Main Financier', value: profile1.mainFinancier, sim });
         }
     }
 
@@ -481,7 +474,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.7) {
             activityScore += sim * 85;
             activityCount++;
-            matchedFields.push(addMatch('Guides/Contacts', profile1.guides, profile2.guides, sim));
+            matchedFields.push({ field: 'Guides/Contacts', value: profile1.guides, sim });
         }
     }
 
@@ -491,7 +484,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.7) {
             activityScore += sim * 70;
             activityCount++;
-            matchedFields.push(addMatch('Vehicles', profile1.vehicles, profile2.vehicles, sim));
+            matchedFields.push({ field: 'Vehicles', value: profile1.vehicles, sim });
         }
     }
 
@@ -501,7 +494,7 @@ if (profile1[field] && profile2[field]) {
         if (sim > 0.6) {
             activityScore += sim * 75;
             activityCount++;
-            matchedFields.push(addMatch('Countries Visited', profile1.countriesVisited, profile2.countriesVisited, sim));
+            matchedFields.push({ field: 'Countries Visited', value: profile1.countriesVisited, sim });
         }
     }
 
@@ -513,7 +506,7 @@ if (profile1[field] && profile2[field]) {
             if (sim > 0.7) {
                 activityScore += sim * 85;
                 activityCount++;
-                matchedFields.push(addMatch(field.replace(/([A-Z])/g, ' $1').trim(), profile1[field], profile2[field], sim));
+                matchedFields.push({ field: field.replace(/([A-Z])/g, ' $1').trim(), value: profile1[field], sim });
             }
         }
     }
@@ -697,12 +690,3 @@ module.exports = {
     updateProfileSuspicionScores,
     getProfileNetwork
 };
-
-
-
-
-
-
-
-
-
