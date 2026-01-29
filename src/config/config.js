@@ -32,7 +32,7 @@ const config = {
 
     // Application metadata
     app: {
-        name: 'ACCUST Management Console',
+        name: 'Terrorism Analysis & Response Information System',
         version: '2.1.0',
         description: 'Secure intelligence database for law enforcement operations',
         environment: process.env.NODE_ENV || 'development'

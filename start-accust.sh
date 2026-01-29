@@ -101,7 +101,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # Main execution
-echo -e "${GREEN}🔐 ACCUST Management Console${NC}"
+echo -e "${GREEN}🔐 Terrorism Analysis & Response Information System${NC}"
 echo -e "${BLUE}   Ultra-Secure Law Enforcement Database${NC}"
 echo -e "${YELLOW}   Version: 2.1.0${NC}"
 echo ""

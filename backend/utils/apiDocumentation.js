@@ -168,25 +168,21 @@ ${chalk.cyan.bold('╚═══════════════════�
 ${chalk.green.bold('1. Test Authentication:')}
    curl -X POST http://localhost:3001/api/auth/login \\
      -H "Content-Type: application/json" \\
-     -H "X-Network-Key: ACCUST_NETWORK_ACCESS_KEY_CHANGE_IN_PRODUCTION_2025_SECRET" \\
+     
      -d '{"pin": "2815"}'
 
 ${chalk.blue.bold('2. Get Dashboard Stats:')}
    curl -X GET http://localhost:3001/api/stats \\
      -H "Authorization: Bearer <your_jwt_token>" \\
-     -H "X-Network-Key: ACCUST_NETWORK_ACCESS_KEY_CHANGE_IN_PRODUCTION_2025_SECRET"
-
-${chalk.yellow.bold('3. Create Profile:')}
+     {chalk.yellow.bold('3. Create Profile:')}
    curl -X POST http://localhost:3001/api/profiles \\
      -H "Authorization: Bearer <your_jwt_token>" \\
-     -H "X-Network-Key: ACCUST_NETWORK_ACCESS_KEY_CHANGE_IN_PRODUCTION_2025_SECRET" \\
+     
      -H "Content-Type: application/json" \\
      -d '{"fullName": "Test Subject", "age": 30, "gender": "Male", ...}'
 
-${chalk.magenta.bold('4. Frontend Integration:')}
-   const API_BASE_URL = 'http://localhost:3001/api';
-   const NETWORK_KEY = 'ACCUST_NETWORK_ACCESS_KEY_CHANGE_IN_PRODUCTION_2025_SECRET';
-        `);
+
+      `);
     }
 }
 

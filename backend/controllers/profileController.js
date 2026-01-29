@@ -257,11 +257,24 @@ const updateProfile = async (req, res) => {
             updateData.photos = photos;
         }
 
+        console.log('🔄 Updating profile with data:', {
+            id,
+            fieldsToUpdate: Object.keys(updateData),
+            name: updateData.name,
+            formDataType: typeof updateData
+        });
+
         const updatedProfile = await Profile.findByIdAndUpdate(
             profile._id,
             updateData,
             { new: true, runValidators: true }
         );
+
+        console.log('✅ Profile updated successfully:', {
+            profileId: updatedProfile.profileId,
+            name: updatedProfile.name,
+            updated: new Date().toISOString()
+        });
 
         res.json({
             success: true,
@@ -269,10 +282,11 @@ const updateProfile = async (req, res) => {
             data: { profile: updatedProfile }
         });
     } catch (error) {
-        console.error('Update profile error:', error);
+        console.error('❌ Update profile error:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to update profile'
+            message: 'Failed to update profile',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
 };
@@ -302,10 +316,19 @@ const deleteProfile = async (req, res) => {
             });
         }
 
+        console.log('🗑️ Deleting profile:', {
+            profileId: profile.profileId,
+            name: profile.name,
+            deletedBy: req.user.userId,
+            clearanceLevel: req.user.clearanceLevel
+        });
+
         await Profile.findByIdAndUpdate(profile._id, {
             isActive: false,
             lastUpdatedBy: req.user.userId
         });
+
+        console.log('✅ Profile deleted successfully:', profile.profileId);
 
         res.json({
             success: true,

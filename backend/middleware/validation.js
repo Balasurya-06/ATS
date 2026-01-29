@@ -9,6 +9,7 @@ const profileValidation = Joi.object({
     
     // Basic Details - Optional
     case: Joi.string().max(500).allow('', null),
+    age: Joi.number().integer().min(0).max(150).allow('', null), // Added missing age field
     
     // Personal Information
     guardian: Joi.string().max(200).allow('', null),
@@ -17,7 +18,8 @@ const profileValidation = Joi.object({
     phone: Joi.string().max(50).allow('', null),
     imeiNumbers: Joi.alternatives().try(
         Joi.array().items(Joi.string().max(50)),
-        Joi.string()
+        Joi.string(),
+        Joi.array().length(0) // Allow empty arrays
     ).allow('', null),
     
     // Family Members
@@ -31,9 +33,12 @@ const profileValidation = Joi.object({
     children: Joi.alternatives().try(
         Joi.array().items(Joi.object({
             gender: Joi.string().allow('', null),
-            name: Joi.string().allow('', null)
-        })),
-        Joi.string()
+            name: Joi.string().allow('', null),
+            _id: Joi.string().allow('', null), // Allow MongoDB IDs
+            id: Joi.string().allow('', null)   // Allow ID aliases
+        }).unknown()),
+        Joi.string(),
+        Joi.array().length(0) // Allow empty arrays
     ).allow('', null),
     closeFriends: Joi.string().max(1000).allow('', null),
     relativesWifeSide: Joi.string().max(1000).allow('', null),
@@ -56,9 +61,12 @@ const profileValidation = Joi.object({
         Joi.array().items(Joi.object({
             level: Joi.string().allow('', null),
             school: Joi.string().allow('', null),
-            year: Joi.string().allow('', null)
-        })),
-        Joi.string()
+            year: Joi.string().allow('', null),
+            _id: Joi.string().allow('', null), // Allow MongoDB IDs
+            id: Joi.string().allow('', null)   // Allow ID aliases
+        }).unknown()),
+        Joi.string(),
+        Joi.array().length(0) // Allow empty arrays
     ).allow('', null),
     expertise: Joi.string().max(1000).allow('', null),
     profession: Joi.string().max(1000).allow('', null),
@@ -133,9 +141,12 @@ const profileValidation = Joi.object({
         Joi.array().items(Joi.object({
             name: Joi.string().allow('', null),
             address: Joi.string().allow('', null),
-            phone: Joi.string().allow('', null)
-        })),
-        Joi.string()
+            phone: Joi.string().allow('', null),
+            _id: Joi.string().allow('', null), // Allow MongoDB IDs
+            id: Joi.string().allow('', null)   // Allow ID aliases
+        }).unknown()),
+        Joi.string(),
+        Joi.array().length(0) // Allow empty arrays
     ).allow('', null),
     video: Joi.string().max(500).allow('', null),
     verifiedBy: Joi.string().max(200).allow('', null),
@@ -158,17 +169,79 @@ const profileValidation = Joi.object({
         Joi.string()
     ).allow('', null),
     tags: Joi.array().items(Joi.string().max(50)).max(20).allow(null)
-}).options({ stripUnknown: false }); // Allow unknown fields to pass through
+}).options({ 
+    stripUnknown: false, // Allow unknown fields to pass through
+    allowUnknown: true,  // Don't fail on unknown properties
+    abortEarly: false    // Return all validation errors, not just the first
+});
 
 const validateProfile = (req, res, next) => {
-    // Skip validation for multipart form data with files
+    // For multipart form data, parse JSON strings and then validate
     if (req.is('multipart/form-data')) {
+        // Parse JSON strings if they exist (from multipart form data)
+        const parsedBody = { ...req.body };
+        
+        ['imeiNumbers', 'children', 'education', 'closeAssociates'].forEach(field => {
+            if (typeof parsedBody[field] === 'string' && parsedBody[field].trim()) {
+                try {
+                    parsedBody[field] = JSON.parse(parsedBody[field]);
+                } catch (e) {
+                    // Keep as is if parsing fails
+                    console.log(`Validation: Failed to parse ${field}:`, parsedBody[field]);
+                }
+            }
+        });
+
+        // Convert age to number if it's a string
+        if (parsedBody.age && typeof parsedBody.age === 'string') {
+            const ageNum = parseInt(parsedBody.age);
+            if (!isNaN(ageNum)) {
+                parsedBody.age = ageNum;
+            }
+        }
+
+        console.log('🔍 Validating parsed data:', {
+            fieldsPresent: Object.keys(parsedBody),
+            arrayFields: {
+                children: Array.isArray(parsedBody.children) ? parsedBody.children.length : typeof parsedBody.children,
+                education: Array.isArray(parsedBody.education) ? parsedBody.education.length : typeof parsedBody.education,
+                closeAssociates: Array.isArray(parsedBody.closeAssociates) ? parsedBody.closeAssociates.length : typeof parsedBody.closeAssociates
+            },
+            age: { value: parsedBody.age, type: typeof parsedBody.age }
+        });
+
+        // Validate the parsed data
+        const { error, value } = profileValidation.validate(parsedBody, {
+            abortEarly: false,
+            stripUnknown: false,
+            allowUnknown: true
+        });
+
+        if (error) {
+            console.log('❌ Validation errors:', error.details.map(d => ({ field: d.path.join('.'), message: d.message })));
+            
+            const errors = error.details.map(detail => ({
+                field: detail.path.join('.'),
+                message: detail.message
+            }));
+            
+            return res.status(400).json({
+                success: false,
+                message: 'Validation error',
+                errors
+            });
+        }
+
+        console.log('✅ Validation successful');
+        req.validatedData = value;
         return next();
     }
 
+    // For regular JSON data
     const { error, value } = profileValidation.validate(req.body, {
         abortEarly: false,
-        stripUnknown: false // Don't strip unknown fields
+        stripUnknown: false,
+        allowUnknown: true
     });
 
     if (error) {
