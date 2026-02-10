@@ -14,6 +14,11 @@
             "date": 1769670044396,
             "name": "audit_logs\\system\\system-2026-01-29.log",
             "hash": "d8d7e8ac58d0451f57001124a469a286110a40daa94f91f64a7cce49dee9a6f6"
+        },
+        {
+            "date": 1770707290425,
+            "name": "audit_logs\\system\\system-2026-02-10.log",
+            "hash": "94c4092facf34445d67e4f9c75027f108b60fe05a8fd273289109a2015365c17"
         }
     ],
     "hashType": "sha256"
