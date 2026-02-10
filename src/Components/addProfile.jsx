@@ -318,7 +318,20 @@ function AddProfile({ onBack }) {
                                     <Input label="Hair Color & Length" value={form.physicalDescription.hairColor} onChange={v => handleChange('physicalDescription.hairColor', v)} />
                                     <Input label="Eye Color" value={form.physicalDescription.eyeColor} onChange={v => handleChange('physicalDescription.eyeColor', v)} />
                                     <Input label="Moustache" value={form.physicalDescription.moustache} onChange={v => handleChange('physicalDescription.moustache', v)} />
-                                    <Input label="Beard" value={form.physicalDescription.beard} onChange={v => handleChange('physicalDescription.beard', v)} />
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Beard</label>
+                                        <select value={form.physicalDescription.beard} onChange={e => handleChange('physicalDescription.beard', e.target.value)} style={inputStyle}>
+                                            <option value="">Select</option>
+                                            <option value="Clean Shaven">Clean Shaven</option>
+                                            <option value="Stubble">Stubble</option>
+                                            <option value="Short Beard">Short Beard</option>
+                                            <option value="Medium Beard">Medium Beard</option>
+                                            <option value="Long Beard">Long Beard</option>
+                                            <option value="Full Beard">Full Beard</option>
+                                            <option value="Goatee">Goatee</option>
+                                            <option value="French Beard">French Beard</option>
+                                        </select>
+                                    </div>
                                     <div style={{ gridColumn: 'span 2' }}>
                                         <Textarea label="Identification Marks (Field 30)" value={form.identificationMark} onChange={v => handleChange('identificationMark', v)} />
                                         <Input label="Dress Style (Field 31)" value={form.dress} onChange={v => handleChange('dress', v)} />

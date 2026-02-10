@@ -960,7 +960,60 @@ function Dashboard() {
                             <DetailItem label="Present Address" value={getAddressString(viewProfile.address?.present)} />
                             <DetailItem label="Permanent Address" value={getAddressString(viewProfile.address?.permanent)} />
                             <DetailItem label="Police Station" value={viewProfile.address?.present?.policeStation} />
-                            <DetailItem label="House GPS" value={viewProfile.houseGPS?.gpsLocation} highlight={true} />
+                            <div style={{
+                                background: '#fef3c7',
+                                padding: '16px',
+                                borderRadius: '10px',
+                                border: '1px solid #fcd34d'
+                            }}>
+                                <label style={{ 
+                                    display: 'block', 
+                                    marginBottom: '12px',
+                                    fontSize: '11px',
+                                    fontWeight: '600',
+                                    color: '#64748b',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px'
+                                }}>House GPS</label>
+                                <div style={{ 
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    color: '#1e293b',
+                                    lineHeight: '1.6',
+                                    wordBreak: 'break-word',
+                                    marginBottom: '12px'
+                                }}>
+                                    {viewProfile.houseGPS?.gpsLocation || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Not Available</span>}
+                                </div>
+                                {viewProfile.houseGPS?.gpsLocation && (
+                                    <button 
+                                        onClick={() => {
+                                            const [lat, lng] = viewProfile.houseGPS.gpsLocation.split(',').map(s => s.trim());
+                                            if (lat && lng) {
+                                                window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`, '_blank');
+                                            }
+                                        }}
+                                        style={{
+                                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '10px 16px',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '13px',
+                                            fontWeight: '600',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseOver={e => e.target.style.transform = 'translateY(-2px)'}
+                                        onMouseOut={e => e.target.style.transform = 'translateY(0)'}
+                                    >
+                                        📍 Open in Street View
+                                    </button>
+                                )}
+                            </div>
                             <DetailItem label="Hideouts" value={viewProfile.hideouts} />
                         </DetailSection>
 
