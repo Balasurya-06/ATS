@@ -447,37 +447,27 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     // ============================================================
     let locationScore = 0, locationCount = 0;
 
-    // Present Address - using nested address object
+    // Present Address - compare profile1's present with profile2's present
     const presAddr1 = buildAddressStr(get(profile1, 'address.present'));
     const presAddr2 = buildAddressStr(get(profile2, 'address.present'));
     if (presAddr1 && presAddr2) {
         const sim = stringSimilarity(presAddr1, presAddr2);
-        if (sim > 0.4) {
+        if (sim > 0.6) {
             locationScore += sim * 100;
             locationCount++;
             matchedFields.push(addMatch('Present Address', presAddr1, presAddr2, sim));
         }
     }
 
-    // Permanent Address - nested
+    // Permanent Address - compare profile1's permanent with profile2's permanent
     const permAddr1 = buildAddressStr(get(profile1, 'address.permanent'));
     const permAddr2 = buildAddressStr(get(profile2, 'address.permanent'));
     if (permAddr1 && permAddr2) {
         const sim = stringSimilarity(permAddr1, permAddr2);
-        if (sim > 0.4) {
+        if (sim > 0.6) {
             locationScore += sim * 95;
             locationCount++;
             matchedFields.push(addMatch('Permanent Address', permAddr1, permAddr2, sim));
-        }
-    }
-
-    // Cross-compare present vs permanent
-    if (presAddr1 && permAddr2) {
-        const sim = stringSimilarity(presAddr1, permAddr2);
-        if (sim > 0.4) {
-            locationScore += sim * 85;
-            locationCount++;
-            matchedFields.push(addMatch('Address Cross-Match', presAddr1, permAddr2, sim));
         }
     }
 
@@ -552,7 +542,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const hideout2 = get(profile2, 'hideoutPlace') || get(profile2, 'hideouts');
     if (hideout1 && hideout2) {
         const sim = stringSimilarity(hideout1, hideout2);
-        if (sim > 0.4) {
+        if (sim > 0.6) {
             locationScore += sim * 90;
             locationCount++;
             matchedFields.push(addMatch('Hideouts', hideout1, hideout2, sim));
@@ -766,18 +756,15 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         }
     }
 
-    // Physical Description - compare sub-fields (height, complexion, build, identificationMarks)
-    const physFields = ['height', 'complexion', 'build', 'identificationMarks'];
-    for (const pf of physFields) {
-        const pv1 = get(profile1, 'physicalDescription.' + pf);
-        const pv2 = get(profile2, 'physicalDescription.' + pf);
-        if (pv1 && pv2) {
-            const sim = stringSimilarity(pv1, pv2);
-            if (sim > 0.7) {
-                identityScore += sim * 40;
-                identityCount++;
-                matchedFields.push(addMatch('Physical: ' + pf.charAt(0).toUpperCase() + pf.slice(1), pv1, pv2, sim));
-            }
+    // Physical Description - only compare unique identifying marks (not generic fields like height/complexion)
+    const idMarks1 = get(profile1, 'physicalDescription.identificationMarks');
+    const idMarks2 = get(profile2, 'physicalDescription.identificationMarks');
+    if (idMarks1 && idMarks2) {
+        const sim = stringSimilarity(idMarks1, idMarks2);
+        if (sim > 0.7) {
+            identityScore += sim * 50;
+            identityCount++;
+            matchedFields.push(addMatch('Identification Marks', idMarks1, idMarks2, sim));
         }
     }
 
@@ -919,16 +906,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         }
     }
 
-    // Tags
-    const tags1 = Array.isArray(profile1.tags) ? profile1.tags : [];
-    const tags2 = Array.isArray(profile2.tags) ? profile2.tags : [];
-    const commonTags = tags1.filter(t => tags2.includes(t));
-    if (commonTags.length > 0) {
-        const tagSim = commonTags.length / Math.max(tags1.length, tags2.length);
-        activityScore += tagSim * 60;
-        activityCount++;
-        matchedFields.push(addMatch('Common Tags', commonTags.join(', '), commonTags.join(', '), tagSim));
-    }
+    // Tags - only count if they have rare/specific tags in common (skip if all profiles share same tags)
 
     // Same interrogating agency
     const interr1 = get(profile1, 'interrogatedBy');
