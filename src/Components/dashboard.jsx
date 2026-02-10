@@ -331,168 +331,110 @@ function Dashboard() {
             fetchLinkages();
         }, []);
 
-        const connectionColors = {
-            Associate: { bg: '#fef2f2', color: '#dc2626', border: '#fca5a5' },
-            Contact: { bg: '#fdf4ff', color: '#a855f7', border: '#d8b4fe' },
-            Location: { bg: '#eff6ff', color: '#2563eb', border: '#93c5fd' },
-            Family: { bg: '#f0fdf4', color: '#16a34a', border: '#86efac' },
-            Identity: { bg: '#fffbeb', color: '#d97706', border: '#fcd34d' },
-            Activity: { bg: '#f0f9ff', color: '#0891b2', border: '#67e8f9' },
-        };
-
-        const getMatchIcon = (field) => {
-            const f = field.toLowerCase();
-            if (f.includes('critical') || f.includes('co-accused')) return '🚨';
-            if (f.includes('phone') || f.includes('imei') || f.includes('whatsapp')) return '📱';
-            if (f.includes('address') || f.includes('district') || f.includes('gps') || f.includes('location')) return '📍';
-            if (f.includes('father') || f.includes('mother') || f.includes('brother') || f.includes('sister') || f.includes('wife') || f.includes('guardian')) return '👨‍👩‍👦';
-            if (f.includes('case') || f.includes('crime') || f.includes('section') || f.includes('police') || f.includes('arrest')) return '⚖️';
-            if (f.includes('advocate')) return '👤';
-            if (f.includes('bank') || f.includes('account')) return '🏦';
-            if (f.includes('email') || f.includes('facebook') || f.includes('instagram') || f.includes('telegram')) return '💬';
-            if (f.includes('tag')) return '🏷️';
-            if (f.includes('organization') || f.includes('activit')) return '🏢';
-            if (f.includes('verif') || f.includes('interrogat')) return '🔍';
-            if (f.includes('physical') || f.includes('complexion') || f.includes('height')) return '🧍';
-            if (f.includes('property') || f.includes('vehicle')) return '🏠';
-            return '🔗';
-        };
-
-        const getSimilarityLabel = (sim) => {
-            if (sim >= 0.95) return { text: 'Exact Match', color: '#dc2626', bg: '#fef2f2' };
-            if (sim >= 0.8) return { text: 'Strong Match', color: '#ea580c', bg: '#fff7ed' };
-            if (sim >= 0.6) return { text: 'Partial Match', color: '#d97706', bg: '#fffbeb' };
-            return { text: 'Similar', color: '#0891b2', bg: '#ecfeff' };
+        const typeColor = {
+            Associate: '#dc2626', Contact: '#7c3aed', Location: '#2563eb',
+            Family: '#16a34a', Identity: '#d97706', Activity: '#0891b2',
         };
 
         return (
             <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                    <div>
-                        <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1e293b', margin: 0 }}>Network Analysis</h1>
-                        <p style={{ color: '#64748b', margin: '4px 0 0 0' }}>
-                            {linkages.length > 0 ? `${linkages.length} connections detected across profiles` : 'Comprehensive view of all detected connections'}
-                        </p>
-                    </div>
-                    {linkages.length > 0 && (
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            {Object.entries(connectionColors).map(([type, c]) => {
-                                const count = linkages.filter(l => l.connectionType === type).length;
-                                if (count === 0) return null;
-                                return (
-                                    <span key={type} style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>
-                                        {type}: {count}
-                                    </span>
-                                );
-                            })}
-                        </div>
-                    )}
+                <div style={{ marginBottom: '20px' }}>
+                    <h1 style={{ fontSize: '26px', fontWeight: '800', color: '#1e293b', margin: 0 }}>Network Analysis</h1>
+                    <p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '14px' }}>
+                        {linkages.length > 0 ? `${linkages.length} connections found` : 'Click "Analyze Network" in Profiles tab to detect connections'}
+                    </p>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {loading ? (
                         <div style={{ padding: '60px', textAlign: 'center', color: '#64748b', background: '#fff', borderRadius: '16px' }}>
-                            <div style={{ width: '40px', height: '40px', border: '3px solid #e2e8f0', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }}></div>
-                            Loading intelligence data...
+                            <div style={{ width: '36px', height: '36px', border: '3px solid #e2e8f0', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }}></div>
+                            Loading...
                         </div>
                     ) : linkages.length === 0 ? (
                         <div style={{ padding: '60px', textAlign: 'center', color: '#64748b', background: '#fff', borderRadius: '16px' }}>
-                            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
-                            <div style={{ fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>No linkages detected yet</div>
-                            <div>Click "Analyze Network" in the Profiles tab to scan for connections.</div>
+                            <div style={{ fontSize: '40px', marginBottom: '8px' }}>🔍</div>
+                            <div style={{ fontWeight: '600', color: '#1e293b' }}>No linkages detected yet</div>
                         </div>
                     ) : (
                         linkages.map((link, idx) => {
-                            const isExpanded = expandedIdx === idx;
-                            const colors = connectionColors[link.connectionType] || { bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' };
-                            const name1 = link.profile1?.name || 'Unknown';
-                            const name2 = link.profile2?.name || 'Unknown';
-                            const id1 = link.profile1?.profileId || 'N/A';
-                            const id2 = link.profile2?.profileId || 'N/A';
-                            const totalFields = link.matchedFields?.length || 0;
+                            const isOpen = expandedIdx === idx;
+                            const color = typeColor[link.connectionType] || '#475569';
+                            const p1 = link.profile1?.name || 'Unknown';
+                            const p2 = link.profile2?.name || 'Unknown';
+                            const fields = link.matchedFields || [];
 
                             return (
-                                <div key={idx} style={{ background: '#fff', borderRadius: '16px', border: `1px solid ${isExpanded ? colors.border : '#e2e8f0'}`, overflow: 'hidden', transition: 'all 0.2s', boxShadow: isExpanded ? `0 4px 16px ${colors.border}40` : '0 1px 3px rgba(0,0,0,0.04)' }}>
-                                    {/* Card Header - clickable */}
-                                    <div 
-                                        onClick={() => setExpandedIdx(isExpanded ? null : idx)}
-                                        style={{ padding: '20px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '16px', background: isExpanded ? colors.bg : '#fff', transition: 'all 0.2s' }}
+                                <div key={idx} style={{ background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                                    {/* Summary row */}
+                                    <div
+                                        onClick={() => setExpandedIdx(isOpen ? null : idx)}
+                                        style={{ padding: '16px 20px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
                                     >
-                                        {/* Subject A */}
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>{name1}</div>
-                                            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>{id1}</div>
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0 }}>
+                                            🔗
                                         </div>
-
-                                        {/* Connection badge */}
-                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-                                            <span style={{ padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', background: colors.bg, color: colors.color, border: `1.5px solid ${colors.border}`, letterSpacing: '0.3px' }}>
-                                                {link.connectionType}
-                                            </span>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                <span style={{ width: '40px', height: '2px', background: colors.border, display: 'block' }}></span>
-                                                <span style={{ fontSize: '11px', color: '#94a3b8', whiteSpace: 'nowrap' }}>{totalFields} matching field{totalFields !== 1 ? 's' : ''}</span>
-                                                <span style={{ width: '40px', height: '2px', background: colors.border, display: 'block' }}></span>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: '14px', color: '#1e293b' }}>
+                                                <strong>{p1}</strong>
+                                                <span style={{ color: '#94a3b8', margin: '0 8px' }}>↔</span>
+                                                <strong>{p2}</strong>
+                                            </div>
+                                            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+                                                {fields.length} matching field{fields.length !== 1 ? 's' : ''} found
                                             </div>
                                         </div>
-
-                                        {/* Subject B */}
-                                        <div style={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
-                                            <div style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>{name2}</div>
-                                            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>{id2}</div>
-                                        </div>
-
-                                        {/* Expand arrow */}
-                                        <div style={{ fontSize: '18px', color: '#94a3b8', transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}>
-                                            ▾
-                                        </div>
+                                        <span style={{
+                                            padding: '4px 12px', borderRadius: '16px', fontSize: '11px', fontWeight: '700',
+                                            background: color + '12', color: color, border: `1px solid ${color}30`
+                                        }}>
+                                            {link.connectionType}
+                                        </span>
+                                        <span style={{ fontSize: '16px', color: '#94a3b8', transform: isOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.15s' }}>▾</span>
                                     </div>
 
-                                    {/* Expanded detail table */}
-                                    {isExpanded && link.matchedFields && (
-                                        <div style={{ borderTop: `1px solid ${colors.border}` }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                <thead>
-                                                    <tr style={{ background: '#f8fafc' }}>
-                                                        <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', width: '22%' }}>Matched Field</th>
-                                                        <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', width: '32%' }}>{name1}</th>
-                                                        <th style={{ padding: '12px 24px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', width: '32%' }}>{name2}</th>
-                                                        <th style={{ padding: '12px 24px', textAlign: 'center', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', width: '14%' }}>Match Level</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {link.matchedFields.map((m, i) => {
-                                                        const simLabel = getSimilarityLabel(m.similarity);
-                                                        const icon = getMatchIcon(m.field);
-                                                        const isCritical = m.field.toLowerCase().includes('critical');
-                                                        return (
-                                                            <tr key={i} style={{ borderTop: '1px solid #f1f5f9', background: isCritical ? '#fef2f2' : (i % 2 === 0 ? '#fff' : '#fafbfc') }}>
-                                                                <td style={{ padding: '12px 24px', verticalAlign: 'top' }}>
-                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                        <span style={{ fontSize: '14px' }}>{icon}</span>
-                                                                        <span style={{ fontSize: '13px', fontWeight: '600', color: isCritical ? '#dc2626' : '#334155' }}>{m.field}</span>
-                                                                    </div>
-                                                                </td>
-                                                                <td style={{ padding: '12px 24px', verticalAlign: 'top' }}>
-                                                                    <div style={{ fontSize: '13px', color: '#1e293b', background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px', wordBreak: 'break-word', lineHeight: '1.5' }}>
-                                                                        {m.value1}
-                                                                    </div>
-                                                                </td>
-                                                                <td style={{ padding: '12px 24px', verticalAlign: 'top' }}>
-                                                                    <div style={{ fontSize: '13px', color: '#1e293b', background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px', wordBreak: 'break-word', lineHeight: '1.5' }}>
-                                                                        {m.value2}
-                                                                    </div>
-                                                                </td>
-                                                                <td style={{ padding: '12px 24px', textAlign: 'center', verticalAlign: 'top' }}>
-                                                                    <span style={{ padding: '3px 10px', borderRadius: '10px', fontSize: '11px', fontWeight: '700', color: simLabel.color, background: simLabel.bg, whiteSpace: 'nowrap' }}>
-                                                                        {Math.round(m.similarity * 100)}% {simLabel.text}
-                                                                    </span>
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
+                                    {/* Detail section */}
+                                    {isOpen && (
+                                        <div style={{ borderTop: '1px solid #f1f5f9', padding: '0' }}>
+                                            {/* Column header */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr 1fr 100px', background: '#f8fafc', padding: '10px 20px', fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', borderBottom: '1px solid #f1f5f9' }}>
+                                                <div>Field</div>
+                                                <div>{p1}'s Data</div>
+                                                <div>{p2}'s Data</div>
+                                                <div style={{ textAlign: 'center' }}>Match %</div>
+                                            </div>
+                                            {/* Rows */}
+                                            {fields.map((m, i) => {
+                                                const pct = Math.round(m.similarity * 100);
+                                                const isCritical = m.field.toLowerCase().includes('critical');
+                                                return (
+                                                    <div key={i} style={{
+                                                        display: 'grid', gridTemplateColumns: '200px 1fr 1fr 100px',
+                                                        padding: '10px 20px', borderBottom: '1px solid #f8fafc',
+                                                        background: isCritical ? '#fef2f2' : (i % 2 === 0 ? '#fff' : '#fafbfc'),
+                                                        fontSize: '13px', alignItems: 'start'
+                                                    }}>
+                                                        <div style={{ fontWeight: '600', color: isCritical ? '#dc2626' : '#334155', paddingRight: '8px' }}>
+                                                            {m.field}
+                                                        </div>
+                                                        <div style={{ color: '#1e293b', paddingRight: '12px', wordBreak: 'break-word', lineHeight: '1.4' }}>
+                                                            {m.value1}
+                                                        </div>
+                                                        <div style={{ color: '#1e293b', paddingRight: '12px', wordBreak: 'break-word', lineHeight: '1.4' }}>
+                                                            {m.value2}
+                                                        </div>
+                                                        <div style={{ textAlign: 'center' }}>
+                                                            <span style={{
+                                                                padding: '2px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: '700',
+                                                                background: pct >= 95 ? '#fef2f2' : pct >= 70 ? '#fff7ed' : '#ecfeff',
+                                                                color: pct >= 95 ? '#dc2626' : pct >= 70 ? '#ea580c' : '#0891b2'
+                                                            }}>
+                                                                {pct}%
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
