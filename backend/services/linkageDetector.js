@@ -97,11 +97,35 @@ function checkArrayMatch(arr1, arr2, fieldGetter = (item) => item) {
 async function detectComprehensiveLinkages(profile1, profile2) {
     if (profile1._id.equals(profile2._id)) return null;
     
+    // Helper: flatten object to readable string (avoids raw JSON display)
+    const flattenToString = (val) => {
+        if (val == null) return '';
+        if (typeof val !== 'object') return String(val);
+        if (Array.isArray(val)) return val.map(flattenToString).filter(Boolean).join(', ');
+        // For plain objects, join key:value pairs in human-readable format
+        return Object.entries(val)
+            .filter(([k, v]) => v && String(v).trim() !== '' && String(v).trim() !== '-' && String(v).trim().toLowerCase() !== 'nil' && k !== '_id' && k !== '__v')
+            .map(([k, v]) => `${k}: ${typeof v === 'object' ? flattenToString(v) : v}`)
+            .join(', ');
+    };
+
     // Helper to create matched field with proper schema format
     const addMatch = (field, val1, val2, sim) => {
-        const strVal1 = val1 && typeof val1 === 'object' ? JSON.stringify(val1) : String(val1 || '');
-        const strVal2 = val2 && typeof val2 === 'object' ? JSON.stringify(val2) : String(val2 || '');
+        const strVal1 = typeof val1 === 'object' ? flattenToString(val1) : String(val1 || '');
+        const strVal2 = typeof val2 === 'object' ? flattenToString(val2) : String(val2 || '');
         return { field, value1: strVal1, value2: strVal2, similarity: sim };
+    };
+
+    // List of values that should be treated as empty/missing
+    const EMPTY_VALUES = ['', '-', '--', 'nil', 'n/a', 'na', 'none', 'null', 'undefined', 'not available', 'not known', 'nk'];
+    const isEmptyValue = (val) => {
+        if (val == null) return true;
+        if (typeof val === 'string') return EMPTY_VALUES.includes(val.trim().toLowerCase());
+        if (typeof val === 'object' && !Array.isArray(val)) {
+            // Object is empty if all its values are empty
+            return Object.values(val).every(v => isEmptyValue(v));
+        }
+        return false;
     };
 
     // Helper to safely get nested values
@@ -113,10 +137,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
             if (val == null) return undefined;
             val = val[p];
         }
-        if (typeof val === 'string') {
-            const trimmed = val.trim();
-            if (trimmed === '' || trimmed === '-' || trimmed === 'Nil' || trimmed === 'nil') return undefined;
-        }
+        if (isEmptyValue(val)) return undefined;
         return val;
     };
 
@@ -369,7 +390,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const sm1 = profile1.socialMedia || {};
     const sm2 = profile2.socialMedia || {};
 
-    if (sm1.email && sm2.email && sm1.email !== '-' && sm2.email !== '-') {
+    if (sm1.email && sm2.email && !isEmptyValue(sm1.email) && !isEmptyValue(sm2.email)) {
         const sim = stringSimilarity(sm1.email, sm2.email);
         if (sim > 0.8) {
             contactScore += 95 * sim;
@@ -393,7 +414,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     for (const platform of socialPlatforms) {
         const v1 = sm1[platform];
         const v2 = sm2[platform];
-        if (v1 && v2 && v1 !== '-' && v2 !== '-') {
+        if (v1 && v2 && !isEmptyValue(v1) && !isEmptyValue(v2)) {
             const sim = stringSimilarity(v1, v2);
             if (sim > 0.8) {
                 contactScore += 85 * sim;
@@ -404,7 +425,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     }
 
     // UPI
-    if (sm1.upi && sm2.upi && sm1.upi !== '-' && sm2.upi !== '-') {
+    if (sm1.upi && sm2.upi && !isEmptyValue(sm1.upi) && !isEmptyValue(sm2.upi)) {
         const sim = stringSimilarity(sm1.upi, sm2.upi);
         if (sim > 0.8) {
             contactScore += 95 * sim;
@@ -431,7 +452,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const presAddr2 = buildAddressStr(get(profile2, 'address.present'));
     if (presAddr1 && presAddr2) {
         const sim = stringSimilarity(presAddr1, presAddr2);
-        if (sim > 0.5) {
+        if (sim > 0.4) {
             locationScore += sim * 100;
             locationCount++;
             matchedFields.push(addMatch('Present Address', presAddr1, presAddr2, sim));
@@ -443,7 +464,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const permAddr2 = buildAddressStr(get(profile2, 'address.permanent'));
     if (permAddr1 && permAddr2) {
         const sim = stringSimilarity(permAddr1, permAddr2);
-        if (sim > 0.5) {
+        if (sim > 0.4) {
             locationScore += sim * 95;
             locationCount++;
             matchedFields.push(addMatch('Permanent Address', permAddr1, permAddr2, sim));
@@ -453,7 +474,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     // Cross-compare present vs permanent
     if (presAddr1 && permAddr2) {
         const sim = stringSimilarity(presAddr1, permAddr2);
-        if (sim > 0.5) {
+        if (sim > 0.4) {
             locationScore += sim * 85;
             locationCount++;
             matchedFields.push(addMatch('Address Cross-Match', presAddr1, permAddr2, sim));
@@ -531,7 +552,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const hideout2 = get(profile2, 'hideoutPlace') || get(profile2, 'hideouts');
     if (hideout1 && hideout2) {
         const sim = stringSimilarity(hideout1, hideout2);
-        if (sim > 0.5) {
+        if (sim > 0.4) {
             locationScore += sim * 90;
             locationCount++;
             matchedFields.push(addMatch('Hideouts', hideout1, hideout2, sim));
@@ -543,7 +564,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const pob2 = get(profile2, 'placeOfBirth');
     if (pob1 && pob2) {
         const sim = stringSimilarity(pob1, pob2);
-        if (sim > 0.7) {
+        if (sim > 0.5) {
             locationScore += sim * 70;
             locationCount++;
             matchedFields.push(addMatch('Place of Birth', pob1, pob2, sim));
@@ -555,7 +576,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const where2 = get(profile2, 'whereabouts');
     if (where1 && where2) {
         const sim = stringSimilarity(where1, where2);
-        if (sim > 0.6) {
+        if (sim > 0.4) {
             locationScore += sim * 80;
             locationCount++;
             matchedFields.push(addMatch('Whereabouts', where1, where2, sim));
@@ -580,7 +601,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const father2 = get(profile2, 'family.father');
     if (father1 && father2) {
         const sim = stringSimilarity(father1, father2);
-        if (sim > 0.8) {
+        if (sim > 0.5) {
             familyScore += sim * 100;
             familyCount++;
             matchedFields.push(addMatch('Father', father1, father2, sim));
@@ -592,7 +613,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const mother2 = get(profile2, 'family.mother');
     if (mother1 && mother2) {
         const sim = stringSimilarity(mother1, mother2);
-        if (sim > 0.8) {
+        if (sim > 0.5) {
             familyScore += sim * 100;
             familyCount++;
             matchedFields.push(addMatch('Mother', mother1, mother2, sim));
@@ -604,7 +625,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const guard2 = get(profile2, 'guardian');
     if (guard1 && guard2) {
         const sim = stringSimilarity(guard1, guard2);
-        if (sim > 0.7) {
+        if (sim > 0.4) {
             familyScore += sim * 90;
             familyCount++;
             matchedFields.push(addMatch('Guardian', guard1, guard2, sim));
@@ -618,7 +639,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         const v2 = get(profile2, 'family.' + field);
         if (v1 && v2) {
             const sim = stringSimilarity(v1, v2);
-            if (sim > 0.6) {
+            if (sim > 0.4) {
                 familyScore += sim * 85;
                 familyCount++;
                 matchedFields.push(addMatch(field.charAt(0).toUpperCase() + field.slice(1), v1, v2, sim));
@@ -633,7 +654,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         const v2 = get(profile2, 'family.' + field);
         if (v1 && v2) {
             const sim = stringSimilarity(v1, v2);
-            if (sim > 0.7) {
+            if (sim > 0.5) {
                 familyScore += sim * 75;
                 familyCount++;
                 matchedFields.push(addMatch(field.charAt(0).toUpperCase() + field.slice(1), v1, v2, sim));
@@ -648,7 +669,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         const v2 = get(profile2, 'family.relativesWifeSide.' + field);
         if (v1 && v2) {
             const sim = stringSimilarity(v1, v2);
-            if (sim > 0.7) {
+            if (sim > 0.5) {
                 familyScore += sim * 70;
                 familyCount++;
                 matchedFields.push(addMatch('Wife Side: ' + field, v1, v2, sim));
@@ -663,7 +684,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         const v2 = get(profile2, field);
         if (v1 && v2) {
             const sim = stringSimilarity(v1, v2);
-            if (sim > 0.6) {
+            if (sim > 0.4) {
                 familyScore += sim * 75;
                 familyCount++;
                 matchedFields.push(addMatch(field, v1, v2, sim));
@@ -691,7 +712,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
         const v2 = get(profile2, 'identityCards.' + field);
         if (v1 && v2) {
             const sim = stringSimilarity(v1, v2);
-            if (sim > 0.8) {
+            if (sim > 0.7) {
                 identityScore += 100;
                 identityCount++;
                 matchedFields.push(addMatch(field.toUpperCase() + ' Match (CRITICAL)', v1, v2, sim));
@@ -723,10 +744,54 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const adv2 = get(profile2, 'advocate.name');
     if (adv1 && adv2) {
         const sim = stringSimilarity(adv1, adv2);
-        if (sim > 0.7) {
+        if (sim > 0.5) {
             identityScore += sim * 80;
             identityCount++;
             matchedFields.push(addMatch('Same Advocate', adv1, adv2, sim));
+        }
+    }
+
+    // Properties - compare sub-fields individually (movable, immovable, vehicles)
+    const propsSubFields = ['movable', 'immovable', 'vehicles'];
+    for (const pf of propsSubFields) {
+        const pv1 = get(profile1, 'properties.' + pf);
+        const pv2 = get(profile2, 'properties.' + pf);
+        if (pv1 && pv2) {
+            const sim = stringSimilarity(pv1, pv2);
+            if (sim > 0.5) {
+                identityScore += sim * 70;
+                identityCount++;
+                matchedFields.push(addMatch('Property: ' + pf.charAt(0).toUpperCase() + pf.slice(1), pv1, pv2, sim));
+            }
+        }
+    }
+
+    // Physical Description - compare sub-fields (height, complexion, build, identificationMarks)
+    const physFields = ['height', 'complexion', 'build', 'identificationMarks'];
+    for (const pf of physFields) {
+        const pv1 = get(profile1, 'physicalDescription.' + pf);
+        const pv2 = get(profile2, 'physicalDescription.' + pf);
+        if (pv1 && pv2) {
+            const sim = stringSimilarity(pv1, pv2);
+            if (sim > 0.7) {
+                identityScore += sim * 40;
+                identityCount++;
+                matchedFields.push(addMatch('Physical: ' + pf.charAt(0).toUpperCase() + pf.slice(1), pv1, pv2, sim));
+            }
+        }
+    }
+
+    // Advocate phone comparison
+    const advPhone1 = get(profile1, 'advocate.phone');
+    const advPhone2 = get(profile2, 'advocate.phone');
+    if (advPhone1 && advPhone2) {
+        const phones1 = extractPhones(advPhone1);
+        const phones2 = extractPhones(advPhone2);
+        const commonAdvPhones = phones1.filter(p => phones2.includes(p));
+        if (commonAdvPhones.length > 0) {
+            identityScore += 85;
+            identityCount++;
+            matchedFields.push(addMatch('Same Advocate Phone', advPhone1, advPhone2, 1.0));
         }
     }
 
@@ -748,7 +813,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const org2 = get(profile2, 'presentOrganization') || '';
     if (org1 && org2) {
         const sim = stringSimilarity(org1, org2);
-        if (sim > 0.6) {
+        if (sim > 0.4) {
             activityScore += sim * 90;
             activityCount++;
             matchedFields.push(addMatch('Organization', org1, org2, sim));
@@ -760,7 +825,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const prevOrg2 = get(profile2, 'prevOrganization') || '';
     if (prevOrg1 && prevOrg2) {
         const sim = stringSimilarity(prevOrg1, prevOrg2);
-        if (sim > 0.6) {
+        if (sim > 0.4) {
             activityScore += sim * 80;
             activityCount++;
             matchedFields.push(addMatch('Previous Organization', prevOrg1, prevOrg2, sim));
@@ -772,7 +837,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const act2 = get(profile2, 'activitiesType');
     if (act1 && act2) {
         const sim = stringSimilarity(act1, act2);
-        if (sim > 0.6) {
+        if (sim > 0.4) {
             activityScore += sim * 95;
             activityCount++;
             matchedFields.push(addMatch('Activities/MO', act1, act2, sim));
@@ -796,7 +861,7 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const illegal2 = get(profile2, 'illegalActivities');
     if (illegal1 && illegal2) {
         const sim = stringSimilarity(illegal1, illegal2);
-        if (sim > 0.5) {
+        if (sim > 0.4) {
             activityScore += sim * 95;
             activityCount++;
             matchedFields.push(addMatch('Illegal Activities (HIGH RISK)', illegal1, illegal2, sim));
@@ -1017,8 +1082,7 @@ async function getProfileNetwork(profileId, maxDepth = 2) {
             id: currentId.toString(),
             name: profile.name,
             suspicionScore: profile.suspicionScore || 0,
-            linkageCount: profile.linkageCount || 0,
-            radicalizationLevel: profile.radicalizationLevel
+            linkageCount: profile.linkageCount || 0
         });
         
         const linkages = await Linkage.find({

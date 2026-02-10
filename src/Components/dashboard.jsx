@@ -570,7 +570,6 @@ function Dashboard() {
                         <thead style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                             <tr>
                                 <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Profile Details</th>
-                                <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Risk Level</th>
                                 <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
                                 <th style={{ padding: '20px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Last Updated</th>
                                 <th style={{ padding: '20px 24px', textAlign: 'right', fontSize: '12px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Action</th>
@@ -578,14 +577,14 @@ function Dashboard() {
                         </thead>
                         <tbody>
                             {isLoading ? (
-                                <tr><td colSpan="5" style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
+                                <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                                         <div style={{ width: '40px', height: '40px', border: '3px solid #e2e8f0', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                                         <span>Loading profiles...</span>
                                     </div>
                                 </td></tr>
                             ) : profiles.filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
-                                <tr><td colSpan="5" style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
+                                <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                                         <span style={{ fontSize: '48px' }}>📋</span>
                                         <span style={{ fontWeight: '600', color: '#1e293b' }}>No profiles found</span>
@@ -600,14 +599,14 @@ function Dashboard() {
                                                 width: '48px', 
                                                 height: '48px', 
                                                 borderRadius: '12px', 
-                                                background: profile.radicalizationLevel === 'High' ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', 
+                                                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', 
                                                 display: 'flex', 
                                                 alignItems: 'center', 
                                                 justifyContent: 'center', 
                                                 fontSize: '18px', 
                                                 fontWeight: '700', 
                                                 color: 'white',
-                                                boxShadow: profile.radicalizationLevel === 'High' ? '0 4px 12px rgba(239, 68, 68, 0.3)' : '0 4px 12px rgba(99, 102, 241, 0.3)'
+                                                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
                                             }}>
                                                 {profile.name.charAt(0)}
                                             </div>
@@ -644,15 +643,6 @@ function Dashboard() {
                                                 <div style={{ fontSize: '12px', color: '#94a3b8' }}>ID: {profile.profileId}</div>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td style={{ padding: '20px 24px' }}>
-                                        <span style={{ 
-                                            padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600',
-                                            background: profile.radicalizationLevel === 'High' ? '#fee2e2' : profile.radicalizationLevel === 'Medium' ? '#fef3c7' : '#dcfce7',
-                                            color: profile.radicalizationLevel === 'High' ? '#ef4444' : profile.radicalizationLevel === 'Medium' ? '#d97706' : '#166534'
-                                        }}>
-                                            {profile.radicalizationLevel || 'Low'}
-                                        </span>
                                     </td>
                                     <td style={{ padding: '20px 24px' }}>
                                         <div style={{ fontSize: '14px', color: '#475569' }}>{profile.monitoringStatus}</div>
