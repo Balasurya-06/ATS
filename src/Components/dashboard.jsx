@@ -97,6 +97,7 @@ function Dashboard() {
     const [viewProfile, setViewProfile] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [networkProfileId, setNetworkProfileId] = useState(null);
+    const [caseFilter, setCaseFilter] = useState('all');
 
     // Refresh stats whenever we switch to the dashboard tab
     useEffect(() => {
@@ -575,6 +576,24 @@ function Dashboard() {
                         <option value="suspicious">🚨 Suspicious Only</option>
                         <option value="high-risk">🔴 High Risk Only</option>
                     </select>
+                    <select style={{ 
+                        padding: '12px 16px', 
+                        borderRadius: '12px', 
+                        border: 'none', 
+                        background: '#ffffff', 
+                        color: '#64748b', 
+                        cursor: 'pointer', 
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        outline: 'none',
+                        maxWidth: '250px'
+                    }} value={caseFilter} onChange={(e) => setCaseFilter(e.target.value)}>
+                        <option value="all">⚖️ All Cases</option>
+                        {[...new Set(profiles.map(p => p.case).filter(Boolean))].map(c => (
+                            <option key={c} value={c}>{c}</option>
+                        ))}
+                    </select>
                     <button 
                         onClick={async () => {
                             if (confirm('Start AI network analysis? This will scan all profiles for connections.')) {
@@ -629,15 +648,15 @@ function Dashboard() {
                                         <span>Loading profiles...</span>
                                     </div>
                                 </td></tr>
-                            ) : profiles.filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 ? (
+                            ) : profiles.filter(p => (!searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())) && (caseFilter === 'all' || p.case === caseFilter)).length === 0 ? (
                                 <tr><td colSpan="4" style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                                         <span style={{ fontSize: '48px' }}>📋</span>
                                         <span style={{ fontWeight: '600', color: '#1e293b' }}>No profiles found</span>
-                                        <span>{profiles.length > 0 ? 'Try a different search term.' : 'Click "Add Profile" to create your first record.'}</span>
+                                        <span>{profiles.length > 0 ? 'Try a different search term or case filter.' : 'Click "Add Profile" to create your first record.'}</span>
                                     </div>
                                 </td></tr>
-                            ) : profiles.filter(p => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())).map((profile, idx) => (
+                            ) : profiles.filter(p => (!searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())) && (caseFilter === 'all' || p.case === caseFilter)).map((profile, idx) => (
                                 <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9', transition: 'all 0.2s', cursor: 'pointer' }} onMouseOver={e => e.currentTarget.style.background = '#f8fafc'} onMouseOut={e => e.currentTarget.style.background = 'transparent'} onClick={() => handleViewProfile(profile._id)}>
                                     <td style={{ padding: '20px 24px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
