@@ -1,96 +1,16 @@
-﻿const Profile = require('../models/Profile');
-const Linkage = require('../models/Linkage');
+const fs = require('fs');
+const path = require('path');
 
-/**
- * COMPREHENSIVE DEEP LINKAGE DETECTOR
- * Checks ALL 70+ profile fields for connections
- */
+const filePath = path.join(__dirname, 'linkageDetector.js');
+const content = fs.readFileSync(filePath, 'utf8');
 
-// Helper: String similarity
-function stringSimilarity(str1, str2) {
-    if (!str1 || !str2) return 0;
-    
-    // Convert to strings if not already
-    if (typeof str1 !== 'string') str1 = String(str1);
-    if (typeof str2 !== 'string') str2 = String(str2);
-    
-    str1 = str1.toLowerCase().trim();
-    str2 = str2.toLowerCase().trim();
-    if (str1 === str2) return 1.0;
-    
-    const matrix = [];
-    for (let i = 0; i <= str2.length; i++) matrix[i] = [i];
-    for (let j = 0; j <= str1.length; j++) matrix[0][j] = j;
-    
-    for (let i = 1; i <= str2.length; i++) {
-        for (let j = 1; j <= str1.length; j++) {
-            const cost = str1[j - 1] === str2[i - 1] ? 0 : 1;
-            matrix[i][j] = Math.min(
-                matrix[i - 1][j] + 1,
-                matrix[i][j - 1] + 1,
-                matrix[i - 1][j - 1] + cost
-            );
-        }
-    }
-    
-    const maxLen = Math.max(str1.length, str2.length);
-    return maxLen === 0 ? 1.0 : 1 - (matrix[str2.length][str1.length] / maxLen);
-}
+// Find boundaries
+const funcCommentStart = content.lastIndexOf('/**', content.indexOf('COMPREHENSIVE LINKAGE DETECTION'));
+const nextFuncCommentStart = content.lastIndexOf('/**', content.indexOf('Analyze all profiles'));
 
-// Helper: GPS distance
-function gpsDistance(coord1, coord2) {
-    if (!coord1 || !coord2) return Infinity;
-    
-    // Ensure coords are strings
-    const str1 = typeof coord1 === 'string' ? coord1 : String(coord1);
-    const str2 = typeof coord2 === 'string' ? coord2 : String(coord2);
-    
-    const parts1 = str1.split(',');
-    const parts2 = str2.split(',');
-    if (parts1.length < 2 || parts2.length < 2) return Infinity;
-    
-    const lat1 = parseFloat(parts1[0]);
-    const lon1 = parseFloat(parts1[1]);
-    const lat2 = parseFloat(parts2[0]);
-    const lon2 = parseFloat(parts2[1]);
-    
-    if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return Infinity;
-    
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-}
+console.log('Replacing from position', funcCommentStart, 'to', nextFuncCommentStart);
 
-// Helper: Check array fields
-function checkArrayMatch(arr1, arr2, fieldGetter = (item) => item) {
-    if (!Array.isArray(arr1) || !Array.isArray(arr2)) return null;
-    if (arr1.length === 0 || arr2.length === 0) return null;
-    
-    for (const item1 of arr1) {
-        const val1 = fieldGetter(item1);
-        if (!val1) continue;
-        
-        for (const item2 of arr2) {
-            const val2 = fieldGetter(item2);
-            if (!val2) continue;
-            
-            if (typeof val1 === 'string' && typeof val2 === 'string') {
-                const sim = stringSimilarity(val1, val2);
-                if (sim > 0.8) return { value: val1, similarity: sim };
-            } else if (val1 === val2) {
-                return { value: val1, similarity: 1.0 };
-            }
-        }
-    }
-    return null;
-}
-
-/**
+const newFunction = `/**
  * COMPREHENSIVE LINKAGE DETECTION
  * Checks EVERY possible field for connections using correct schema paths
  */
@@ -130,13 +50,13 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     // Helper to extract all phone numbers from a string
     const extractPhones = (str) => {
         if (!str) return [];
-        return String(str).match(/\d{10,}/g) || [];
+        return String(str).match(/\\d{10,}/g) || [];
     };
 
     // Helper to extract names from a comma/semicolon separated string
     const extractNames = (str) => {
         if (!str) return [];
-        return String(str).split(/[,;]/).map(s => s.replace(/\(.*?\)/g, '').trim().toLowerCase()).filter(s => s.length > 2);
+        return String(str).split(/[,;]/).map(s => s.replace(/\\(.*?\\)/g, '').trim().toLowerCase()).filter(s => s.length > 2);
     };
     
     const linkages = [];
@@ -284,8 +204,8 @@ async function detectComprehensiveLinkages(profile1, profile2) {
             caseCount++;
             matchedFields.push(addMatch('Arrest Crime/Section Match', crime1, crime2, sim));
         }
-        const crimeNos1 = crime1.match(/\d+\/\d+/g) || [];
-        const crimeNos2 = crime2.match(/\d+\/\d+/g) || [];
+        const crimeNos1 = crime1.match(/\\d+\\/\\d+/g) || [];
+        const crimeNos2 = crime2.match(/\\d+\\/\\d+/g) || [];
         const commonCrimes = crimeNos1.filter(c => crimeNos2.includes(c));
         if (commonCrimes.length > 0) {
             caseScore += 100;
@@ -489,8 +409,8 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const gps2 = get(profile2, 'houseGPS.gpsLocation');
     if (gps1 && gps2) {
         const parseGPS = (str) => {
-            const latMatch = str.match(/lat\s*([\d.]+)/i);
-            const lonMatch = str.match(/long?\s*([\d.]+)/i);
+            const latMatch = str.match(/lat\\s*([\\d.]+)/i);
+            const lonMatch = str.match(/long?\\s*([\\d.]+)/i);
             if (latMatch && lonMatch) return latMatch[1] + ',' + lonMatch[1];
             return str;
         };
@@ -510,8 +430,8 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     const workGps2 = get(profile2, 'workplaceGPS.gpsLocation');
     if (workGps1 && workGps2) {
         const parseGPS = (str) => {
-            const latMatch = str.match(/lat\s*([\d.]+)/i);
-            const lonMatch = str.match(/long?\s*([\d.]+)/i);
+            const latMatch = str.match(/lat\\s*([\\d.]+)/i);
+            const lonMatch = str.match(/long?\\s*([\\d.]+)/i);
             if (latMatch && lonMatch) return latMatch[1] + ',' + lonMatch[1];
             return str;
         };
@@ -907,163 +827,10 @@ async function detectComprehensiveLinkages(profile1, profile2) {
     };
 }
 
-/**
- * Analyze all profiles
- */
-async function analyzeAllProfiles() {
-    console.log('ðŸ” [DEEP SCAN] Starting comprehensive linkage analysis...');
-    
-    try {
-        const profiles = await Profile.find({ isActive: true }).lean();
-        console.log(`ðŸ“Š Analyzing ${profiles.length} profiles across ALL fields...`);
-        
-        let totalLinkages = 0;
-        
-        for (let i = 0; i < profiles.length; i++) {
-            for (let j = i + 1; j < profiles.length; j++) {
-                const linkageData = await detectComprehensiveLinkages(profiles[i], profiles[j]);
-                
-                if (linkageData) {
-                    await Linkage.findOneAndUpdate(
-                        {
-                            $or: [
-                                { profile1: linkageData.profile1, profile2: linkageData.profile2 },
-                                { profile1: linkageData.profile2, profile2: linkageData.profile1 }
-                            ]
-                        },
-                        linkageData,
-                        { upsert: true, new: true }
-                    );
-                    totalLinkages++;
-                }
-            }
-            
-            if ((i + 1) % 50 === 0) {
-                console.log(`âœ“ Processed ${i + 1}/${profiles.length} profiles`);
-            }
-        }
-        
-        // Update suspicion scores
-        await updateProfileSuspicionScores();
-        
-        console.log(`âœ… [DEEP SCAN] Complete! Found ${totalLinkages} linkages.`);
-        return { success: true, totalLinkages, profilesAnalyzed: profiles.length };
-        
-    } catch (error) {
-        console.error('âŒ Error:', error);
-        throw error;
-    }
-}
+`;
 
-/**
- * Update suspicion scores
- */
-async function updateProfileSuspicionScores() {
-    const profiles = await Profile.find({ isActive: true });
-    
-    for (const profile of profiles) {
-            const linkages = await Linkage.find({
-            $or: [{ profile1: profile._id }, { profile2: profile._id }],
-            isActive: true
-        })
-        .populate('profile1', 'name')
-        .populate('profile2', 'name');
-        
-        if (linkages.length === 0) {
-            profile.suspicionScore = 0;
-            profile.isSuspicious = false;
-            profile.linkageCount = 0;
-            profile.suspicionReasons = [];
-        } else {
-            const avgSuspicion = linkages.reduce((sum, l) => sum + l.suspicionScore, 0) / linkages.length;
-            const maxSuspicion = Math.max(...linkages.map(l => l.suspicionScore));
-            
-            profile.suspicionScore = Math.round((avgSuspicion * 0.3) + (maxSuspicion * 0.7));
-            profile.isSuspicious = profile.suspicionScore > 30;
-            profile.linkageCount = linkages.length;
-            profile.lastAnalyzed = new Date();
-            
-            profile.suspicionReasons = linkages
-                .filter(l => l.suspicionScore > 40)
-                .map(l => {
-                    const otherName = (l.profile1?._id || l.profile1).toString() === profile._id.toString() 
-                        ? l.profile2?.name || 'Unknown' 
-                        : l.profile1?.name || 'Unknown';
-                    return `${l.connectionType} linkage with ${otherName} (${l.strength.toFixed(0)}%)`;
-                })
-                .slice(0, 5);
-        }
-        
-        await profile.save();
-    }
-}
+const newContent = content.substring(0, funcCommentStart) + newFunction + content.substring(nextFuncCommentStart);
 
-/**
- * Get network data
- */
-async function getProfileNetwork(profileId, maxDepth = 2) {
-    const nodes = new Map();
-    const links = [];
-    const visited = new Set();
-    
-    async function exploreNode(currentId, depth) {
-        if (depth > maxDepth || visited.has(currentId.toString())) return;
-        visited.add(currentId.toString());
-        
-        const profile = await Profile.findById(currentId).lean();
-        if (!profile) return;
-        
-        nodes.set(currentId.toString(), {
-            id: currentId.toString(),
-            name: profile.name,
-            suspicionScore: profile.suspicionScore || 0,
-            linkageCount: profile.linkageCount || 0,
-            radicalizationLevel: profile.radicalizationLevel
-        });
-        
-        const linkages = await Linkage.find({
-            $or: [{ profile1: currentId }, { profile2: currentId }],
-            isActive: true,
-            strength: { $gte: 50 }
-        }).lean();
-        
-        for (const linkage of linkages) {
-            const otherId = linkage.profile1.equals(currentId) ? linkage.profile2 : linkage.profile1;
-            
-            links.push({
-                source: linkage.profile1.toString(),
-                target: linkage.profile2.toString(),
-                strength: linkage.strength,
-                type: linkage.connectionType,
-                suspicion: linkage.suspicionScore
-            });
-            
-            if (depth < maxDepth) {
-                await exploreNode(otherId, depth + 1);
-            }
-        }
-    }
-    
-    await exploreNode(profileId, 0);
-    
-    return {
-        nodes: Array.from(nodes.values()),
-        links: links
-    };
-}
-
-module.exports = {
-    detectComprehensiveLinkages,
-    analyzeAllProfiles,
-    updateProfileSuspicionScores,
-    getProfileNetwork
-};
-
-
-
-
-
-
-
-
-
+fs.writeFileSync(filePath, newContent, 'utf8');
+console.log('Done! File updated successfully.');
+console.log('New file length:', newContent.length, 'chars');
