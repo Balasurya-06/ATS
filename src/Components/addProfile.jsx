@@ -1,6 +1,29 @@
 import React, { useState } from 'react';
 import apiService from '../services/api.js';
 
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', outline: 'none', background: '#f8fafc' };
+
+const Input = ({ label, value, onChange, type = 'text', required = false }) => (
+    <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase' }}>
+            {label} {required && '*'}
+        </label>
+        <input 
+            type={type} value={value || ''} onChange={e => onChange(e.target.value)}
+            style={inputStyle}
+        />
+    </div>
+);
+
+const Textarea = ({ label, value, onChange, rows = 3 }) => (
+    <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase' }}>{label}</label>
+        <textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={rows}
+            style={{ ...inputStyle, resize: 'vertical' }}
+        />
+    </div>
+);
+
 function AddProfile({ onBack }) {
     const [activeStep, setActiveStep] = useState(0);
     const [form, setForm] = useState({
@@ -94,27 +117,6 @@ function AddProfile({ onBack }) {
             setIsLoading(false);
         }
     };
-
-    const Input = ({ label, value, onChange, type = 'text', required = false }) => (
-        <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase' }}>
-                {label} {required && '*'}
-            </label>
-            <input 
-                type={type} value={value || ''} onChange={e => onChange(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', outline: 'none', background: '#f8fafc' }}
-            />
-        </div>
-    );
-
-    const Textarea = ({ label, value, onChange, rows = 3 }) => (
-        <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase' }}>{label}</label>
-            <textarea value={value || ''} onChange={e => onChange(e.target.value)} rows={rows}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '13px', outline: 'none', background: '#f8fafc', resize: 'vertical' }}
-            />
-        </div>
-    );
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
