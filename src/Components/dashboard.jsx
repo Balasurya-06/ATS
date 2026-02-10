@@ -522,7 +522,9 @@ function Dashboard() {
         </div>
     );
 
-    const RecordsView = () => (
+    // Use useMemo to prevent RecordsView from re-rendering when parent renders
+    const RecordsViewMemo = useMemo(() => {
+        return () => (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
@@ -533,6 +535,7 @@ function Dashboard() {
                     <div style={{ position: 'relative' }}>
                         <input 
                             type="text" 
+                            key="search-input"
                             placeholder="Search records..." 
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -745,7 +748,10 @@ function Dashboard() {
                 </div>
             </div>
         </div>
-    );
+        );
+    }, [searchQuery, caseFilter, profiles, isLoading]);
+
+    const RecordsView = RecordsViewMemo;
 
     const ProfileDetailModal = () => {
         if (!viewProfile) return null;
@@ -908,28 +914,59 @@ function Dashboard() {
                                 </div>
                             </div>
                         </div>
-                        <button 
-                            onClick={() => setViewProfile(null)} 
-                            style={{ 
-                                border: 'none', 
-                                background: 'rgba(255,255,255,0.1)', 
-                                width: '44px', 
-                                height: '44px', 
-                                borderRadius: '10px', 
-                                cursor: 'pointer', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                color: 'white',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseOver={e => e.target.style.background = 'rgba(255,255,255,0.2)'}
-                            onMouseOut={e => e.target.style.background = 'rgba(255,255,255,0.1)'}
-                        >
-                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button 
+                                onClick={() => {
+                                    const link = document.createElement('a');
+                                    link.href = `http://localhost:5000/api/profiles/${viewProfile._id}/export-pdf`;
+                                    link.download = `${viewProfile.name}_${viewProfile.profileId}_Dossier.pdf`;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                }}
+                                style={{ 
+                                    border: 'none', 
+                                    background: 'rgba(34, 197, 94, 0.2)', 
+                                    width: '44px', 
+                                    height: '44px', 
+                                    borderRadius: '10px', 
+                                    cursor: 'pointer', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    color: '#22c55e',
+                                    transition: 'all 0.2s',
+                                    fontSize: '20px'
+                                }}
+                                onMouseOver={e => e.target.style.background = 'rgba(34, 197, 94, 0.3)'}
+                                onMouseOut={e => e.target.style.background = 'rgba(34, 197, 94, 0.2)'}
+                                title="Export as PDF"
+                            >
+                                📄
+                            </button>
+                            <button 
+                                onClick={() => setViewProfile(null)} 
+                                style={{ 
+                                    border: 'none', 
+                                    background: 'rgba(255,255,255,0.1)', 
+                                    width: '44px', 
+                                    height: '44px', 
+                                    borderRadius: '10px', 
+                                    cursor: 'pointer', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    color: 'white',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={e => e.target.style.background = 'rgba(255,255,255,0.2)'}
+                                onMouseOut={e => e.target.style.background = 'rgba(255,255,255,0.1)'}
+                            >
+                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     {/* Scrollable Content */}
