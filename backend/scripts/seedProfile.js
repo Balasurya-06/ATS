@@ -200,8 +200,8 @@ const asiqProfile = {
     
     // Risk Classification
     radicalizationLevel: "High",
-    threatCategory: "Terrorism Suspect",
-    monitoringStatus: "Incarcerated",
+    threatCategory: "Attacker",
+    monitoringStatus: "Active Monitoring",
     fileClassification: "Confidential",
     
     // AI Analysis
@@ -387,8 +387,8 @@ const ismailProfile = {
     
     // Risk Classification
     radicalizationLevel: "High",
-    threatCategory: "Terrorism Suspect",
-    monitoringStatus: "Released",
+    threatCategory: "Attacker",
+    monitoringStatus: "Active Monitoring",
     fileClassification: "Confidential",
     
     // AI Analysis
