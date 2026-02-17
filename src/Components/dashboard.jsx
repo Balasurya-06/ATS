@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import apiService from '../services/api.js';
 import AddProfile from './addProfile.jsx';
 import LLMChat from './LLMChat.jsx';
@@ -523,8 +523,7 @@ function Dashboard() {
     );
 
     // Use useMemo to prevent RecordsView from re-rendering when parent renders
-    const RecordsViewMemo = useMemo(() => {
-        return () => (
+    const recordsViewContent = useMemo(() => (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
@@ -748,10 +747,7 @@ function Dashboard() {
                 </div>
             </div>
         </div>
-        );
-    }, [searchQuery, caseFilter, profiles, isLoading]);
-
-    const RecordsView = RecordsViewMemo;
+    ), [searchQuery, caseFilter, profiles, isLoading]);
 
     const ProfileDetailModal = () => {
         if (!viewProfile) return null;
@@ -1276,7 +1272,7 @@ function Dashboard() {
             <Sidebar />
             <div style={{ marginLeft: '260px', flex: 1, padding: '32px', overflowY: 'auto', minHeight: '100vh' }}>
                 {activeTab === 'dashboard' && <DashboardView />}
-                {activeTab === 'records' && <RecordsView />}
+                {activeTab === 'records' && recordsViewContent}
                 {activeTab === 'linkages' && <LinkagesView />}
                 {activeTab === 'add' && <AddProfile onBack={() => setActiveTab('dashboard')} />}
                 {activeTab === 'chat' && <LLMChat />}

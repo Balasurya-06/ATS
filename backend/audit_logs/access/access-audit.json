@@ -19,6 +19,11 @@
             "date": 1770707289170,
             "name": "audit_logs\\access\\access-2026-02-10.log",
             "hash": "5d3ae031691f8a5fc0eece0dd6036ef2fb5f64da7b2a1cc4aa12dea391b33fed"
+        },
+        {
+            "date": 1771295688232,
+            "name": "audit_logs\\access\\access-2026-02-17.log",
+            "hash": "2d0a124aabc3ad0d0d7c4b6ded06fe4e21c1c9d94d84d57ceeeb10cb4416fbc0"
         }
     ],
     "hashType": "sha256"
